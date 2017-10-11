@@ -1,0 +1,51 @@
+// 一个可以让你把库上传到maven仓库的插件
+apply plugin: 'maven'
+
+// 声明变量记录maven库地址
+def mavenRepositoryUrl
+def versionName;
+// NEXUS_USERNAME等变量在我们主项目的gradle.properties中可以找到
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+afterEvaluate { project ->
+    // 我们声明我们要执行的上传到maven的task
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                if (project.hasProperty("publishtype")) {
+                    println publishtype;
+                    if (publishtype == "release") {
+                        mavenRepositoryUrl = "http://mvn.gemantic.com/content/repositories/releases/"
+                        versionName = VERSION_NAME;
+                    } else {
+                        mavenRepositoryUrl = "http://mvn.gemantic.com/content/repositories/snapshots/"
+                        versionName = VERSION_NAME + "-SNAPSHOT";
+                    }
+                }
+                // 我们类比下compile com.squareup.okhttp:okhttp:2.7.0
+                // groupId 对应com.squareup.okhttp; artifactId 对应okhttp;version对应2.7.0
+                // 这样就类似坐标的方式定位到了制定的库文件
+                pom.artifactId = POM_ARTIFACT_ID
+                pom.groupId = POM_GROUP_ID
+                pom.version = versionName
+
+                // 授权验证,这里也就是你登陆搭建的私服服务器时候的用户名\密码
+                repository(url: mavenRepositoryUrl) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+
+                // 这里是配置我们maven库需要的pom.xml文件的各个内容,具体意思我们在主目录gradle.properties中解释
+                pom.project {
+                    name POM_NAME
+                    packaging POM_PACKAGING
+                }
+            }
+        }
+    }
+}
