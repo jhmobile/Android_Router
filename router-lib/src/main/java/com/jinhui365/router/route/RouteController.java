@@ -32,19 +32,12 @@ public class RouteController extends AbsRouter {
 
     protected Context context;
     protected ResultVO resultVO;
+    private Class targetClass = null;
     protected List<InterceptorImpl> interceptors;//Interceptor集合
     protected Map<String, Object> params;//跳转需要的参数
     protected Map<String, String> options;//baseContext子类需要的配置项参数
-    protected List<RouteController> list = new ArrayList<>();
+    protected List<RouteController> children = new ArrayList<>();
 
-
-    public void setOptions(Map<String, String> options) {
-        this.options = options;
-    }
-
-    public int getCurrentInterceptorIndex() {
-        return currentInterceptorIndex;
-    }
 
     public Context getContext() {
         return context;
@@ -54,20 +47,144 @@ public class RouteController extends AbsRouter {
         this.context = context;
     }
 
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
+    /**
+     * 获取执行过的Interceptor集合
+     *
+     * @return
+     */
+    public List<InterceptorImpl> getInterceptors() {
+        return interceptors;
     }
 
-    public RouteController() {
-
+    /**
+     * 获取传递过来的所有参数
+     *
+     * @return
+     */
+    public Map<String, Object> getParams() {
+        return params;
     }
 
-    public RouteController(RouteController parent, ResultVO resultVO) {
-        if (null != parent) {
-            parent.list.add(this);
+    /**
+     * 获取baseContext子类的配置项参数
+     *
+     * @return
+     */
+    public Map<String, String> getOptions() {
+        return options;
+    }
+
+    /**
+     * 根据下标获取权限验证类
+     *
+     * @param index
+     * @return
+     */
+    public InterceptorImpl getAuthInterceptorByIndex(int index) {
+        return interceptors.get(index);
+    }
+
+    /**
+     * 获取权限组的数量
+     *
+     * @return
+     */
+    public int getAuthInterceptorSize() {
+        return interceptors.size();
+    }
+
+    /**
+     * 检查当前条件以及未验证条件，返回是否还有未验证的前置条件
+     */
+    public boolean hasUnVerifyInterceptor() {
+        return !interceptors.isEmpty() &&
+                currentInterceptorIndex < (interceptors.size() - 1);
+    }
+
+    /**
+     * 获取当前在执行的权限
+     *
+     * @return
+     */
+    public InterceptorImpl getCurrentInterceptor() {
+        if (-1 == currentInterceptorIndex || currentInterceptorIndex >= interceptors.size()) {
+            return null;
         }
-        this.resultVO = resultVO;
-        this.interceptors = resultVO.getInterceptors(this);
+        return interceptors.get(currentInterceptorIndex);
+    }
+
+    /**
+     * 清楚垃圾数据，controller  options里面对应key的数据不需要传递给intent
+     */
+    private void clearRubbishParams() {
+        if (options != null && !options.isEmpty() && params != null && !params.isEmpty()) {
+            for (String key : options.keySet()) {
+                if (params.containsKey(key)) {
+                    params.remove(key);
+                }
+            }
+        }
+    }
+
+    private void callback(RouteResult result, String msg) {
+        if (result != RouteResult.SUCCEED) {
+            RLog.w(msg);
+        }
+        if (mRouteRequest.getCallback() != null) {
+            mRouteRequest.getCallback().callback(result, mRouteRequest.getUri(), msg);
+        }
+    }
+
+    @Override
+    public Intent getIntent(Context context) {
+        if (null == targetClass) {
+            RLog.e("no targetClass");
+            return null;
+        }
+        Intent intent = new Intent();
+        clearRubbishParams();
+        Bundle bundle = new Bundle();
+        if (params != null && !params.isEmpty()) {
+            for (String key : params.keySet()) {
+                bundle.putAll(Util.getBundle(bundle, key, params.get(key)));
+            }
+        }
+        intent.setClass(context, targetClass);
+        return intent;
+    }
+
+
+    @Override
+    public void go(Context context) {
+        this.context = context;
+        if (null != mRouteRequest.getParent()) {
+            mRouteRequest.getParent().children.add(this);
+        }
+        Router.routeController = mRouteRequest.getParent();
+        doing();
+    }
+
+    /**
+     * 数据预处理
+     */
+    private void doing() {
+        if (mRouteRequest.getUri() == null) {
+            callback(RouteResult.FAILED, "uri == null.");
+        }
+
+        resultVO = RouterManager.getInstance().getResultVOByPageID(mRouteRequest.getUri().getPath());
+        if (null != resultVO) {//配置文件不为空，走配置文件
+            interceptors = resultVO.getInterceptors(this);
+            options = resultVO.getController().getOptions();
+            targetClass = resultVO.getActivityClass();
+            with(resultVO.getParams());
+        } else {//走注解
+            Set<Map.Entry<String, Class<?>>> entries = AptHub.routeTable.entrySet();
+
+
+        }
+        params = mRouteRequest.getParams();
+        next();
     }
 
     /**
@@ -115,7 +232,7 @@ public class RouteController extends AbsRouter {
         }
 
         if (context instanceof Activity) {
-            (Activity)context.startActivityForResult(intent, mRouteRequest.getRequestCode());
+            (Activity) context.startActivityForResult(intent, mRouteRequest.getRequestCode());
 
             if (mRouteRequest.getEnterAnim() != 0 && mRouteRequest.getExitAnim() != 0) {
                 // Add transition animation.
@@ -126,144 +243,4 @@ public class RouteController extends AbsRouter {
         callback(RouteResult.SUCCEED, null);
     }
 
-    /**
-     * 检查当前条件以及未验证条件，返回是否还有未验证的前置条件
-     */
-    public boolean hasUnVerifyInterceptor() {
-        return !interceptors.isEmpty() &&
-                currentInterceptorIndex < (interceptors.size() - 1);
-    }
-
-    /**
-     * 获取当前在执行的权限
-     *
-     * @return
-     */
-    public InterceptorImpl getCurrentInterceptor() {
-        if (-1 == currentInterceptorIndex || currentInterceptorIndex >= interceptors.size()) {
-            return null;
-        }
-        return interceptors.get(currentInterceptorIndex);
-    }
-
-    /**
-     * 清楚垃圾数据，controller  options里面对应key的数据不需要传递给intent
-     */
-    private void clearRubbishParams() {
-        if (getOptions() != null && !getOptions().isEmpty()) {
-            for (String key : getOptions().keySet()) {
-                if (getParams().containsKey(key)) {
-                    getParams().remove(key);
-                }
-            }
-        }
-    }
-
-    /**
-     * 获取执行过的Interceptor集合
-     *
-     * @return
-     */
-    public List<InterceptorImpl> getInterceptors() {
-        return interceptors;
-    }
-
-    /**
-     * 获取传递过来的所有参数
-     *
-     * @return
-     */
-    public Map<String, Object> getParams() {
-        return params;
-    }
-
-    /**
-     * 获取baseContext子类的配置项参数
-     *
-     * @return
-     */
-    public Map<String, String> getOptions() {
-        if (null != resultVO.getController()) {
-            return resultVO.getController().getOptions();
-        } else {
-            return options;
-        }
-    }
-
-    /**
-     * 根据下标获取权限验证类
-     *
-     * @param index
-     * @return
-     */
-    public InterceptorImpl getAuthInterceptorByIndex(int index) {
-        return interceptors.get(index);
-    }
-
-    /**
-     * 获取权限组的数量
-     *
-     * @return
-     */
-    public int getAuthInterceptorSize() {
-        return interceptors.size();
-    }
-
-    private void callback(RouteResult result, String msg) {
-        if (result != RouteResult.SUCCEED) {
-            RLog.w(msg);
-        }
-        if (mRouteRequest.getCallback() != null) {
-            mRouteRequest.getCallback().callback(result, mRouteRequest.getUri(), msg);
-        }
-    }
-
-    private void doing(Context context) {
-        if (mRouteRequest.getUri() == null) {
-            callback(RouteResult.FAILED, "uri == null.");
-        }
-        Set<Map.Entry<String, Class<?>>> entries = AptHub.routeTable.entrySet();
-
-        ResultVO resultVO = RouterManager.getInstance().getResultVOByPageID(mRouteRequest.getUri().getPath());
-        if (null != resultVO) {//配置文件不为空，走配置文件
-            next();
-        } else {//走默认注解
-
-        }
-    }
-
-    @Override
-    public Intent getIntent(Context context) {
-        Class activityClass = null;
-        if (resultVO != null) {//热更文件获取
-            activityClass = resultVO.getActivityClass();
-        } else {//本地反射获取
-
-        }
-        if (null == activityClass) {
-            return null;
-        }
-        Intent intent = new Intent();
-        clearRubbishParams();
-        Bundle bundle = new Bundle();
-        if (getParams() != null && !getParams().isEmpty()) {
-            for (String key : getParams().keySet()) {
-                bundle.putAll(Util.getBundle(bundle, key, getParams().get(key)));
-            }
-        }
-        intent.setClass(context, activityClass);
-        return intent;
-    }
-
-
-    @Override
-    public void go(Context context) {
-        this.context = context;
-        doing(context);
-        if (null != mRouteRequest.getParent()) {
-            mRouteRequest.getParent().list.add(this);
-            Router.routeController = mRouteRequest.getParent();
-        }
-
-    }
 }
