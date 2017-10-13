@@ -68,8 +68,6 @@ public interface IRouter {
      */
     IRouter addInterceptors(String... interceptors);
 
-    Intent getIntent(Context context);
-
     void go(Context context, RouteCallback callback);
 
     void go(Context context);

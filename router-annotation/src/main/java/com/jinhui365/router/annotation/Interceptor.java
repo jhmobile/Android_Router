@@ -18,5 +18,5 @@ public @interface Interceptor {
     /**
      * Interceptor name.
      */
-    String value();
+    String name();
 }

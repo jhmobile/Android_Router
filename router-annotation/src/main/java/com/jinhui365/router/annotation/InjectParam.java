@@ -18,5 +18,5 @@ public @interface InjectParam {
     /**
      * Map param field with the specify key in bundle.
      */
-    String key() default "";
+    String name() default "";
 }

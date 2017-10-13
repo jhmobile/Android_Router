@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 
 import com.jinhui365.router.data.ResultVO;
 import com.jinhui365.router.interceptor.InterceptorImpl;
@@ -23,7 +25,7 @@ import java.util.Set;
  * 包含了跳转需要的初始信息，包括但不限于发起跳转的源、跳转配置、跳转参数
  * 管理执行跳转过程中的运行时信息,前置条件的管理
  */
-public class RouteController extends AbsRouter {
+public class RouteController {
     private static final String TAG = "RouteController";
     /**
      * 当前在执行的前置条件下标
@@ -31,13 +33,37 @@ public class RouteController extends AbsRouter {
     private int currentInterceptorIndex = -1;
 
     protected Context context;
-    protected ResultVO resultVO;
-    private Class targetClass = null;
-    protected List<InterceptorImpl> interceptors;//Interceptor集合
-    protected Map<String, Object> params;//跳转需要的参数
-    protected Map<String, String> options;//baseContext子类需要的配置项参数
-    protected List<RouteController> children = new ArrayList<>();
+    private RouteRequest routeRequest;
+    private Class targetClass;
+    private List<InterceptorImpl> interceptors;//Interceptor集合
+    private Map<String, Object> params;//跳转需要的参数
+    private Map<String, Object> options;//baseContext子类需要的配置项参数
+    private List<RouteController> children = new ArrayList<>();
 
+    /**
+     * add a child of RouteController
+     * @param controller
+     */
+    public void addChild(RouteController controller) {
+        children.add(controller);
+    }
+
+    public RouteController(RouteRequest routeRequest, Context context) {
+        this.routeRequest = routeRequest;
+        this.context = context;
+        this.targetClass = routeRequest.getTargetClass();
+        this.interceptors = routeRequest.getInterceptors();
+        this.params = routeRequest.getParams();
+        this.options = routeRequest.getOptions();
+    }
+
+    public Class getTargetClass() {
+        return routeRequest.getTargetClass();
+    }
+
+    public void setTargetClass(Class targetClass) {
+        this.targetClass = targetClass;
+    }
 
     public Context getContext() {
         return context;
@@ -70,27 +96,8 @@ public class RouteController extends AbsRouter {
      *
      * @return
      */
-    public Map<String, String> getOptions() {
+    public Map<String, Object> getOptions() {
         return options;
-    }
-
-    /**
-     * 根据下标获取权限验证类
-     *
-     * @param index
-     * @return
-     */
-    public InterceptorImpl getAuthInterceptorByIndex(int index) {
-        return interceptors.get(index);
-    }
-
-    /**
-     * 获取权限组的数量
-     *
-     * @return
-     */
-    public int getAuthInterceptorSize() {
-        return interceptors.size();
     }
 
     /**
@@ -124,67 +131,6 @@ public class RouteController extends AbsRouter {
                 }
             }
         }
-    }
-
-    private void callback(RouteResult result, String msg) {
-        if (result != RouteResult.SUCCEED) {
-            RLog.w(msg);
-        }
-        if (mRouteRequest.getCallback() != null) {
-            mRouteRequest.getCallback().callback(result, mRouteRequest.getUri(), msg);
-        }
-    }
-
-    @Override
-    public Intent getIntent(Context context) {
-        if (null == targetClass) {
-            RLog.e("no targetClass");
-            return null;
-        }
-        Intent intent = new Intent();
-        clearRubbishParams();
-        Bundle bundle = new Bundle();
-        if (params != null && !params.isEmpty()) {
-            for (String key : params.keySet()) {
-                bundle.putAll(Util.getBundle(bundle, key, params.get(key)));
-            }
-        }
-        intent.setClass(context, targetClass);
-        return intent;
-    }
-
-
-    @Override
-    public void go(Context context) {
-        this.context = context;
-        if (null != mRouteRequest.getParent()) {
-            mRouteRequest.getParent().children.add(this);
-        }
-        Router.routeController = mRouteRequest.getParent();
-        doing();
-    }
-
-    /**
-     * 数据预处理
-     */
-    private void doing() {
-        if (mRouteRequest.getUri() == null) {
-            callback(RouteResult.FAILED, "uri == null.");
-        }
-
-        resultVO = RouterManager.getInstance().getResultVOByPageID(mRouteRequest.getUri().getPath());
-        if (null != resultVO) {//配置文件不为空，走配置文件
-            interceptors = resultVO.getInterceptors(this);
-            options = resultVO.getController().getOptions();
-            targetClass = resultVO.getActivityClass();
-            with(resultVO.getParams());
-        } else {//走注解
-            Set<Map.Entry<String, Class<?>>> entries = AptHub.routeTable.entrySet();
-
-
-        }
-        params = mRouteRequest.getParams();
-        next();
     }
 
     /**
@@ -226,21 +172,54 @@ public class RouteController extends AbsRouter {
      * 如果需要可以直接跳转
      */
     protected void gotoTarget() {
-        Intent intent = getIntent(context);
+        Intent intent = assembleFlagsIntent();
         if (intent == null) {
             return;
         }
 
         if (context instanceof Activity) {
-            (Activity) context.startActivityForResult(intent, mRouteRequest.getRequestCode());
+            if (routeRequest.getRequestCode() > 0) {
+                ActivityCompat.startActivityForResult((Activity) context, intent, routeRequest.getRequestCode(), null);
+            } else {
+                ActivityCompat.startActivity((Activity) context, intent, null);
+            }
+            assembleAnim();
+        }
+        RealRouter.getInstance().callback(RouteResult.SUCCEED, null);
+    }
 
-            if (mRouteRequest.getEnterAnim() != 0 && mRouteRequest.getExitAnim() != 0) {
-                // Add transition animation.
-                ((Activity) context).overridePendingTransition(
-                        mRouteRequest.getEnterAnim(), mRouteRequest.getExitAnim());
+    protected Intent getIntent() {
+        if (null == targetClass) {
+            RLog.e("no targetClass");
+            return null;
+        }
+        Intent intent = new Intent();
+        clearRubbishParams();
+        Bundle bundle = new Bundle();
+        if (params != null && !params.isEmpty()) {
+            for (String key : params.keySet()) {
+                bundle.putAll(Util.getBundle(bundle, key, params.get(key)));
             }
         }
-        callback(RouteResult.SUCCEED, null);
+        intent.setClass(context, targetClass);
+        return intent;
+    }
+
+    protected void assembleAnim() {
+        if (context instanceof Activity) {
+            if (routeRequest.getEnterAnim() != 0 && routeRequest.getExitAnim() != 0) {
+                // Add transition animation.
+                ((Activity) context).overridePendingTransition(
+                        routeRequest.getEnterAnim(), routeRequest.getExitAnim());
+            }
+
+        }
+    }
+
+    protected Intent assembleFlagsIntent() {
+        Intent intent = getIntent();
+        intent.addFlags(routeRequest.getFlags());
+        return intent;
     }
 
 }

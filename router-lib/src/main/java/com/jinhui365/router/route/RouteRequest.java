@@ -3,6 +3,8 @@ package com.jinhui365.router.route;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import com.jinhui365.router.interceptor.InterceptorImpl;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +22,11 @@ public class RouteRequest implements Serializable {
     private Uri uri;
     @Nullable
     private RouteController parent;
-
-    private Map<String,Object> params;
+    private Class targetClass;
+    private Map<String, Object> params;
+    private Map<String,Object> options;
     private int flags;
+    private List<InterceptorImpl> interceptors;
     // skip all the interceptors
     private boolean skipInterceptors;
     // skip some interceptors temporarily
@@ -47,6 +51,14 @@ public class RouteRequest implements Serializable {
         this.parent = parent;
     }
 
+    public Class getTargetClass() {
+        return targetClass;
+    }
+
+    public void setTargetClass(Class targetClass) {
+        this.targetClass = targetClass;
+    }
+
     public RouteRequest(Uri uri) {
         this.uri = uri;
     }
@@ -67,6 +79,14 @@ public class RouteRequest implements Serializable {
         this.params = params;
     }
 
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
+    }
+
     public int getFlags() {
         return flags;
     }
@@ -77,6 +97,14 @@ public class RouteRequest implements Serializable {
 
     public void addFlags(int flags) {
         this.flags |= flags;
+    }
+
+    public List<InterceptorImpl> getInterceptors() {
+        return interceptors;
+    }
+
+    public void setInterceptors(List<InterceptorImpl> interceptors) {
+        this.interceptors = interceptors;
     }
 
     public boolean isSkipInterceptors() {

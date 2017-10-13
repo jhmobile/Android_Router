@@ -24,4 +24,9 @@ public @interface Route {
      * The interceptors' name.
      */
     String[] interceptors() default {};
+    /**
+     * the conditions' path
+     * It's a jsonString
+     */
+    String conditions();
 }
