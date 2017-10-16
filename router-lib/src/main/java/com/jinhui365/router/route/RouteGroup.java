@@ -1,6 +1,4 @@
 package com.jinhui365.router.route;
-
-import com.jinhui365.router.interceptor.InterceptorImpl;
 import java.util.List;
 
 /**
@@ -15,5 +13,5 @@ public abstract class RouteGroup {
     /**
      * 设置拦截器
      */
-    abstract List<InterceptorImpl> getInterceptor();
+    abstract List<String> getInterceptor();
 }

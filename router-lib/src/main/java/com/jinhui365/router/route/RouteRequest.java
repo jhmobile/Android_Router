@@ -8,23 +8,25 @@ import com.jinhui365.router.interceptor.InterceptorImpl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Route request object.
- * <p>
- * Created by Cheney on 2017/3/31.
+ * Name:RouteRequest
+ * Author:jmtian
+ * Commemt:Route request object.
+ * Date: 2017/10/16 14:39
  */
+
 public class RouteRequest implements Serializable {
     private static final int INVALID_REQUEST_CODE = -1;
 
     private Uri uri;
-    @Nullable
-    private RouteController parent;
+
     private Class targetClass;
     private Map<String, Object> params;
-    private Map<String,Object> options;
+    private Map<String, Object> options;
     private int flags;
     private List<InterceptorImpl> interceptors;
     // skip all the interceptors
@@ -41,15 +43,6 @@ public class RouteRequest implements Serializable {
     private int enterAnim;
     private int exitAnim;
 
-
-    @Nullable
-    public RouteController getParent() {
-        return parent;
-    }
-
-    public void setParent(@Nullable RouteController parent) {
-        this.parent = parent;
-    }
 
     public Class getTargetClass() {
         return targetClass;
@@ -72,6 +65,9 @@ public class RouteRequest implements Serializable {
     }
 
     public Map<String, Object> getParams() {
+        if (null == params || params.isEmpty()) {
+            params = new HashMap<>();
+        }
         return params;
     }
 
@@ -80,6 +76,9 @@ public class RouteRequest implements Serializable {
     }
 
     public Map<String, Object> getOptions() {
+        if (null == options || options.isEmpty()) {
+            options = new HashMap<>();
+        }
         return options;
     }
 

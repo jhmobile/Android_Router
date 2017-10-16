@@ -1,4 +1,4 @@
-package com.jinhui365.router.data;
+package com.jinhui365.router.utils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 /**

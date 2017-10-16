@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Name:InjectParam
+ * Name:Param
  * Author:jmtian
  * Commemt:Annotation for injected params.
  * Date: 2017/9/21 16:38
@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.CLASS)
-public @interface InjectParam {
+public @interface Param {
     /**
      * Map param field with the specify key in bundle.
      */

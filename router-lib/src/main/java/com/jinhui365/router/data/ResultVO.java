@@ -1,8 +1,10 @@
 package com.jinhui365.router.data;
 
 import android.util.Log;
-import com.jinhui365.router.route.RouteController;
+
+import com.google.gson.annotations.SerializedName;
 import com.jinhui365.router.interceptor.InterceptorImpl;
+import com.jinhui365.router.route.RouteContext;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class ResultVO implements Serializable {
     private String activity;//activity Class
     private Map<String, Object> params;//传入activity的参数
     private List<InterceptorVO> interceptors;//拦截器数组
-    private ControllerVO controller;//路由控制器
+    private ContextVO rContext;//路由控制器
 
     public String getActivity() {
         return activity;
@@ -53,12 +55,12 @@ public class ResultVO implements Serializable {
         this.interceptors = interceptors;
     }
 
-    public ControllerVO getController() {
-        return controller;
+    public ContextVO getRContext() {
+        return rContext;
     }
 
-    public void setController(ControllerVO controller) {
-        this.controller = controller;
+    public void setRContext(ContextVO rContext) {
+        this.rContext = rContext;
     }
 
     /**
@@ -82,16 +84,16 @@ public class ResultVO implements Serializable {
      * @param index
      * @return
      */
-    public InterceptorImpl getInterceptorByIndex(RouteController context, int index) {
+    public InterceptorImpl getInterceptorByIndex(RouteContext context, int index) {
         if (null == interceptors || interceptors.isEmpty()) {
             return null;
         }
         if (index < interceptors.size()) {
-            InterceptorVO authVO = interceptors.get(index);
+            InterceptorVO interceptorVO = interceptors.get(index);
             try {
-                InterceptorImpl vo = authVO.getInterceptorClazz()
-                        .getConstructor(RouteController.class, Map.class, Map.class)
-                        .newInstance(context, authVO.getParams(), authVO.getOptions());
+                InterceptorImpl vo = interceptorVO.getInterceptorClazz()
+                        .getConstructor(RouteContext.class, Map.class, Map.class)
+                        .newInstance(context, interceptorVO.getParams(), interceptorVO.getOptions());
                 return vo;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -103,16 +105,16 @@ public class ResultVO implements Serializable {
     /**
      * 实例化Interceptor集合
      *
-     * @param routeController
+     * @param routeContext
      * @return
      */
-    public List<InterceptorImpl> getInterceptors(RouteController routeController) {
+    public List<InterceptorImpl> getInterceptors(RouteContext routeContext) {
         List<InterceptorImpl> list = new ArrayList<>();
         if (null == interceptors || interceptors.isEmpty()) {
             return list;
         }
         for (int i = 0; i < interceptors.size(); i++) {
-            list.add(getInterceptorByIndex(routeController, i));
+            list.add(getInterceptorByIndex(routeContext, i));
         }
         return list;
     }

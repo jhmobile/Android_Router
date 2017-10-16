@@ -1,6 +1,6 @@
 package com.jinhui365.router.data;
 
-import com.jinhui365.router.route.RouteController;
+import com.jinhui365.router.route.RouteContext;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -13,11 +13,11 @@ import java.util.Map;
  */
 
 
-public class ControllerVO implements Serializable {
-    private static final String TAG = "ControllerVO";
+public class ContextVO implements Serializable {
+    private static final String TAG = "ContextVO";
 
-    private String clazz;//RouterController子类
-    private Map<String, String> options;//RouterController子类需要的配置参数
+    private String clazz;//RouterContext子类
+    private Map<String, String> options;//RouterContext子类需要的配置参数
 
     public String getClazzName() {
         return clazz;
@@ -28,10 +28,10 @@ public class ControllerVO implements Serializable {
      *
      * @return
      */
-    public Class<RouteController> getClazz() {
-        Class<RouteController> clz = null;
+    public Class<RouteContext> getClazz() {
+        Class<RouteContext> clz = null;
         try {
-            clz = (Class<RouteController>) Class.forName(clazz);
+            clz = (Class<RouteContext>) Class.forName(clazz);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (Exception e) {

@@ -21,12 +21,33 @@ public @interface Route {
     String[] path();
 
     /**
-     * The interceptors' name.
-     */
-    String[] interceptors() default {};
-    /**
      * the conditions' path
      * It's a jsonString
+     * et:
+     * {"type": "spirit","rateType": "unfix"}
      */
-    String conditions();
+    String conditions() default "";
+
+    /**
+     * the path's group
+     */
+    Class<?> group();
+
+    /**
+     * The interceptors's name array.
+     */
+    String[] interceptors() default {};
+
+    /**
+     * the route of params
+     * it's a jsonString
+     * et:
+     * {"MAIN_TAB":"1"}
+     */
+    String params() default "";
+
+    /**
+     * one router of context's class
+     */
+    String injectContext() default "routeContext";
 }

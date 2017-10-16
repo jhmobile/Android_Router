@@ -1,10 +1,6 @@
 package com.jinhui365.router.interceptor;
 
-import com.jinhui365.router.interceptor.IInterceptor;
-import com.jinhui365.router.interceptor.InterceptorLifeEnum;
-import com.jinhui365.router.interceptor.InterceptorStateCallBack;
-import com.jinhui365.router.interceptor.InterceptorStateEnum;
-import com.jinhui365.router.route.RouteController;
+import com.jinhui365.router.route.RouteContext;
 
 import java.util.Map;
 
@@ -25,9 +21,9 @@ import static com.jinhui365.router.interceptor.InterceptorStateEnum.STATE_SUCCES
  * 验证后实现
  */
 
-public abstract class InterceptorImpl implements IInterceptor, InterceptorStateCallBack {
+public abstract class InterceptorImpl implements InterceptorStateCallBack {
 
-    protected RouteController routeController;
+    protected RouteContext routeContext;
     protected Map<String, Object> params;//Interceptor传递的参数
     protected Map<String, Object> options;//condition需要的配置项
 
@@ -68,19 +64,17 @@ public abstract class InterceptorImpl implements IInterceptor, InterceptorStateC
     }
 
 
-    public InterceptorImpl(RouteController routeController, Map<String, Object> params, Map<String, Object> options) {
-        this.routeController = routeController;
+    public InterceptorImpl(RouteContext routeContext, Map<String, Object> params, Map<String, Object> options) {
+        this.routeContext = routeContext;
         this.params = params;
         this.options = options;
     }
-
 
     /**
      * Author:jmtian
      * Date: 2017/8/14 17:18
      * description: 初始验证
      */
-    @Override
     public void onStart() {
         lifeState = START;
         checkoutState(this);
@@ -91,7 +85,6 @@ public abstract class InterceptorImpl implements IInterceptor, InterceptorStateC
      * Date: 2017/8/14 17:18
      * description: 验证完成回调
      */
-    @Override
     public void onAfter() {
         lifeState = InterceptorLifeEnum.AFTER;
         checkoutState(this);
@@ -102,7 +95,6 @@ public abstract class InterceptorImpl implements IInterceptor, InterceptorStateC
      * Date: 2017/8/24 12:58
      * description: 验证打断
      */
-    @Override
     public void onBreak() {
         lifeState = InterceptorLifeEnum.BREAK;
         onEndBreak();
@@ -114,33 +106,50 @@ public abstract class InterceptorImpl implements IInterceptor, InterceptorStateC
      * 1 失败
      * 2 pending
      */
-    @Override
-    public abstract void checkoutState(InterceptorStateCallBack stateCallBack);
+    protected abstract void checkoutState(InterceptorStateCallBack stateCallBack);
 
-    @Override
-    public void onSuccessBefore() {
-        routeController.next();
+    /**
+     * start checkout success
+     */
+    protected void onSuccessBefore() {
+        routeContext.next();
     }
 
-    @Override
-    public void onPendingBefore() {
+    /**
+     * start checkout pending
+     */
+    protected void onPendingBefore() {
     }
 
-    @Override
-    public abstract void onFailBefore();
+    /**
+     * start checkout fail
+     */
+    protected abstract void onFailBefore();
 
-    public void onSuccessAfter() {
-        routeController.next();
+    /**
+     * after checkout success
+     */
+    protected void onSuccessAfter() {
+        routeContext.next();
     }
 
-    public void onPendingAfter() {
+    /**
+     * after checkout pending
+     */
+    protected void onPendingAfter() {
     }
 
-    public void onFailAfter() {
+    /**
+     * after checkout fail
+     */
+    protected void onFailAfter() {
 
     }
 
-    public void onEndBreak() {
+    /**
+     * break
+     */
+    protected void onEndBreak() {
 
     }
 

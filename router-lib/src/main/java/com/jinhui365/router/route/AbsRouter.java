@@ -6,19 +6,23 @@ import android.support.annotation.AnimRes;
 import android.util.Log;
 
 import com.jinhui365.router.utils.GsonUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Name:AbsRouter
+ * Author:jmtian
+ * Commemt:one router of api
+ * Date: 2017/10/16 14:18
  */
-abstract class AbsRouter implements IRouter {
+
+abstract class AbsRouter {
     private static final String TAG = "AbsRouter";
 
     RouteRequest mRouteRequest;
 
-    @Override
-    public IRouter build(Uri uri) {
+    public AbsRouter build(Uri uri) {
         mRouteRequest = new RouteRequest(uri);
         Map<String, Object> params = new HashMap<>();
         params.put(Router.RAW_URI, uri == null ? null : uri.toString());
@@ -26,27 +30,18 @@ abstract class AbsRouter implements IRouter {
         return this;
     }
 
-    @Override
-    public IRouter parent(RouteController controller) {
-        mRouteRequest.setParent(controller);
-        return this;
-    }
-
-    @Override
-    public IRouter callback(RouteCallback callback) {
+    public AbsRouter callback(RouteCallback callback) {
         mRouteRequest.setCallback(callback);
         return this;
     }
 
-    @Override
-    public IRouter requestCode(int requestCode) {
+    public AbsRouter requestCode(int requestCode) {
         mRouteRequest.setRequestCode(requestCode);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public IRouter with(String key, Object value) {
+    public AbsRouter with(String key, Object value) {
         if (value == null) {
             Log.w(TAG, "Ignored: The extra value is null.");
             return this;
@@ -60,8 +55,7 @@ abstract class AbsRouter implements IRouter {
         return this;
     }
 
-    @Override
-    public IRouter with(Map<String, Object> map) {
+    public AbsRouter with(Map<String, Object> map) {
         if (map == null || map.isEmpty()) {
             Log.w(TAG, "Ignored: The extra value is null.");
             return this;
@@ -75,47 +69,47 @@ abstract class AbsRouter implements IRouter {
         return this;
     }
 
-    @Override
-    public IRouter with(String json) {
+    public AbsRouter with(String json) {
         Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
         with(map);
         return this;
     }
 
-    @Override
-    public IRouter addFlags(int flags) {
+    public AbsRouter addFlags(int flags) {
         mRouteRequest.addFlags(flags);
         return this;
     }
 
-    @Override
-    public IRouter anim(@AnimRes int enterAnim, @AnimRes int exitAnim) {
+    public AbsRouter anim(@AnimRes int enterAnim, @AnimRes int exitAnim) {
         mRouteRequest.setEnterAnim(enterAnim);
         mRouteRequest.setExitAnim(exitAnim);
         return this;
     }
 
-    @Override
-    public IRouter skipInterceptors() {
+    public AbsRouter skipInterceptors() {
         mRouteRequest.setSkipInterceptors(true);
         return this;
     }
 
-    @Override
-    public IRouter skipInterceptors(String... interceptors) {
+
+    public AbsRouter skipInterceptors(String... interceptors) {
         mRouteRequest.removeInterceptors(interceptors);
         return this;
     }
 
-    @Override
-    public IRouter addInterceptors(String... interceptors) {
+    public AbsRouter addInterceptors(String... interceptors) {
         mRouteRequest.addInterceptors(interceptors);
         return this;
     }
 
-    @Override
+
     public void go(Context context, RouteCallback callback) {
         mRouteRequest.setCallback(callback);
         go(context);
     }
+
+    public void go(Context context) {
+
+    }
+
 }
