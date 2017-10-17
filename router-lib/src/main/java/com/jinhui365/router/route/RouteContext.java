@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 
+import com.jinhui365.router.annotation.InjectContext;
 import com.jinhui365.router.interceptor.InterceptorImpl;
 import com.jinhui365.router.utils.RLog;
 import com.jinhui365.router.utils.Util;
@@ -22,7 +23,7 @@ import java.util.Map;
  * 包含了跳转需要的初始信息，包括但不限于发起跳转的源、跳转配置、跳转参数
  * 管理执行跳转过程中的运行时信息,前置条件的管理
  */
-
+@InjectContext(name = "routeContext")
 public class RouteContext {
     private static final String TAG = "RouteContext";
     /**

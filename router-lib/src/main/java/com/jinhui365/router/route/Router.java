@@ -97,6 +97,9 @@ public class Router extends AbsRouter {
             currentContext = new RouteContext(mRouteRequest, context);
         }
         currentContext.setParent(parentContext);
+        if (null != parentContext) {
+            parentContext.addChild(currentContext);
+        }
         currentContext.next();
     }
 

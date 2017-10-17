@@ -31,7 +31,7 @@ public @interface Route {
     /**
      * the path's group
      */
-    Class<?> group();
+    Class<?> group() default Class.class;
 
     /**
      * The interceptors's name array.

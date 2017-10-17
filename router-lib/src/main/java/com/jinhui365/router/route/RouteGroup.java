@@ -13,5 +13,5 @@ public abstract class RouteGroup {
     /**
      * 设置拦截器
      */
-    abstract List<String> getInterceptor();
+    abstract String[] getInterceptor();
 }

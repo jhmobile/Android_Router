@@ -40,7 +40,6 @@ abstract class AbsRouter {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public AbsRouter with(String key, Object value) {
         if (value == null) {
             Log.w(TAG, "Ignored: The extra value is null.");
