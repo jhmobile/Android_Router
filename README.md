@@ -1,17 +1,17 @@
 # Android_Router
-通过一个url地址访问Android页面
-
-##一，目标
-1.嵌套跳转，解决配置文件重复配置
+##通过一个url地址访问Android页面##
+##一，目标##
+###1.嵌套跳转，解决配置文件重复配置
 例： 跳购买需要登录绑卡，绑卡需要登录，购买前置条件只需要配置绑卡。
-考虑方案：应用初始化，初始化所有前置条件，通过优先级控制执行顺序，flag标记是否执行业务代码。
-2.跳转采用链式调用。
-3.页面路径，页面所需参数，前置条件 采用注解的形式，前置条件热更放在配置文件中。
-配置文件中仅配置需要修改的业务，其余页面配置使用注解，配置在类中。
-4.支持传递自定义Serializable对象
-5.增加跳转结果的回调
+考虑方案：应用初始化，初始化所有前置条件，通过优先级控制执行顺序，flag标记是否执行业务代码。###
+###2.跳转采用链式调用。###
+###3.页面路径，页面所需参数，前置条件 采用注解的形式，前置条件热更放在配置文件中。
+配置文件中仅配置需要修改的业务，其余页面配置使用注解，配置在类中。###
+###4.支持传递自定义Serializable对象###
+###5.增加跳转结果的回调###
 
 ##二，配置文件格式
+    <pre><code>
     {
         "/deal/buy-detail": [//路由url
         {
@@ -93,14 +93,14 @@
         }
         ],
     }
+    </code></pre>
 
+##三，API使用##
 
-##三，API使用
+###1，初始化,(注：最好是在Application里面进行初始化)：###
+    <pre><code>Router.getInstance().initialize(configJsonString);//configJsonString指配置文件转换的json，可以为空，例如：Router.initialize(null)<pre><code>
 
-###1，初始化,(注：最好是在Application里面进行初始化)：
-    Router.getInstance().initialize(configJsonString);//configJsonString指配置文件转换的json，可以为空，例如：Router.initialize(null)
-
-###2，调用路由API
+###2，调用路由API###
 
 
 ####(1),最简单的调用,例如，登录：
