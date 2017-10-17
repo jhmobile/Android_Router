@@ -92,15 +92,14 @@
     }
 </code></pre>
 
-##三，API使用##
+## 三，API使用
 
-###1，初始化,(注：最好是在Application里面进行初始化)：###
+### 1，初始化,(注：最好是在Application里面进行初始化)：
     <pre><code>Router.getInstance().initialize(configJsonString);//configJsonString指配置文件转换的json，可以为空，例如：Router.initialize(null)<pre><code>
 
-###2，调用路由API###
+### 2，调用路由API
 
-
-####(1),最简单的调用,例如，登录：
+#### (1),最简单的调用,例如，登录：
     Router.getInstance().build("/login").go(context);
     //如果项目内使用配置文件形式，需要在配置文件配置：
     "/login":[
@@ -116,18 +115,18 @@
     }
 
 
-####(2),配置文件的配置，如上第二步，不再具体描述。
+#### (2),配置文件的配置，如上第二步，不再具体描述。
 
 
-####(3),注解的使用
+#### (3),注解的使用
 
-#####1>.只需要一个地址的路由注解：
+##### 1>.只需要一个地址的路由注解：
         @Route(path = "/login")
         public class LoginActivity{
 
         }
 
-#####2>.需要拦截器的路由注解：
+##### 2>.需要拦截器的路由注解：
         @Route(path = "/deal/buy-detail",interceptors = {"loginInterceptor","bindCardInterceptor"})
         public class FixBuyDetailActivity{
 
@@ -149,7 +148,7 @@
         }
         //绑卡拦截器，同上，不在放具体代码
 
-#####3>.如果实现分组管理，2>中的路由可以写成如下方式：
+##### 3>.如果实现分组管理，2>中的路由可以写成如下方式：
          @Route(path = "/deal/buy-detail",group = DealGroup.class)
          public class FixBuyDetailActivity{
 
@@ -163,7 +162,7 @@
             }
          }
 
-#####4>.如果实现分组管理，路由中还有其他拦截器，注解实现如下：
+##### 4>.如果实现分组管理，路由中还有其他拦截器，注解实现如下：
         @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"})
         public class FixBuyDetailActivity{
 
@@ -183,7 +182,7 @@
                }
         }
 
-#####5>.如果路由是同一个路由，对应多个页面，注解使用如下，通过conditions匹配区分目标页：
+##### 5>.如果路由是同一个路由，对应多个页面，注解使用如下，通过conditions匹配区分目标页：
         @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"})
         public class FixBuyDetailActivity{
 
@@ -194,13 +193,13 @@
 
         }
 
-#####6>.如果多个路由，对应同一个页面：
+##### 6>.如果多个路由，对应同一个页面：
         @Route(path = {"/webView","/deal/baseWebView"})
         public class BaseWebViewActivity{
 
         }
 
-#####7>.如果路由跳转，需要一些固定参数，可以有如下两种方式实现：
+##### 7>.如果路由跳转，需要一些固定参数，可以有如下两种方式实现：
         方式一：
         @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"},params = "{\"state\":\"1\"}")
         public class FixBuyDetailActivity{
@@ -212,7 +211,7 @@
 
         }
 
-#####8>.如果库的上下文管理类不能满足当前应用的跳转，我们可以实现子类，重写RouteContext，注解实现如下：
+##### 8>.如果库的上下文管理类不能满足当前应用的跳转，我们可以实现子类，重写RouteContext，注解实现如下：
          @Route(path = "/deal/buy-detail?state=1",conditions = "{\"type\":\"shb\"}",group = DealGroup.class,,injectContext = "buyRouteContext")
          public class CoolBuyDetailActivity{
 
@@ -230,18 +229,18 @@
          }
 
 
-####(4),路由API的调用详解，所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
+#### (4),路由API的调用详解，所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
 
-#####1>.路由直接跳转，如下：
+##### 1>.路由直接跳转，如下：
         Router.getInstance().build("/login")//路由地址
                             .go(context);
 
-#####2>.跳转需要添加参数:
+##### 2>.跳转需要添加参数:
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)//动态添加的参数，添加参数支持多种格式，with(key,value),with(map),with(jsonString)
                             .go(context);
 
-#####3>.跳转需要跳过注解或者配置文件中配置的某些拦截器：
+##### 3>.跳转需要跳过注解或者配置文件中配置的某些拦截器：
         需要传递参数,跳过所有拦截器，例1:
         Router.getInstance().build("/deal/buy-detail")
                                     .with(params)
@@ -262,7 +261,7 @@
                                     .skipInterceptors("loginInterceptor","BindCardInterceptor")
                                     .go(context);
 
-#####4>.跳转需要动态添加一些拦截器：
+##### 4>.跳转需要动态添加一些拦截器：
         添加一个拦截器,例1：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
@@ -274,11 +273,11 @@
                             .addInterceptors("loginInterceptor","BindCardInterceptor");
                             .go(context);
 
-######注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有改API的调用，则后面无论添加多
+###### 注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有改API的调用，则后面无论添加多
 少个拦截器，都是无效的；如果调用的是.skipInterceptors("loginInterceptor")含参数的API，则只会移除指定的拦截器，如果
 后面有.addInterceptors("loginInterceptor")的调用，依然会执行。
 
-#####5>.跳转需要在当前页的ActivityForResult里面接收数据:
+##### 5>.跳转需要在当前页的ActivityForResult里面接收数据:
         例1：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
@@ -293,20 +292,20 @@
 
         build 和 go之间的所有API都是独立使用的，互不影响。
 
-#####6>.如果需要指定打开和关闭目标页的动画：
+##### 6>.如果需要指定打开和关闭目标页的动画：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
                             .anim(enterAnim,exitAnim)
                             .go(context);
 
-#####7>.如果需要制定打开目标页的打开方式：
+##### 7>.如果需要制定打开目标页的打开方式：
         清除目标页上面的所有页面,例:
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             .go(context);
 
-#####8>.路由需要对跳转构成进行回调结果查看，处理：
+##### 8>.路由需要对跳转构成进行回调结果查看，处理：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -317,7 +316,7 @@
                                   }
                             });
 
-#####9>.路由API的全景描述实例：
+##### 9>.路由API的全景描述实例：
         底部弹出登录页，例1：
         Router.getInstance().build("/login")
                             .anim(R.anim.push_down_in,R.anim.push_up_out)
@@ -329,4 +328,4 @@
                             .requestCode(100)
                             .go(context);
 
-######注：其他组合不在这里举例一一说明，大家可以自己进行验证和体验。
+###### 注：其他组合不在这里举例一一说明，大家可以自己进行验证和体验。
