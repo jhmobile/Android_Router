@@ -3,10 +3,12 @@ package com.jinhui365.router.utils;
 import android.util.Log;
 
 /**
- * Internal simple log.
- * <p>
- * Created by Cheney on 2016/12/27.
+ * Name:RLog
+ * Author:jmtian
+ * Commemt:router log  class
+ * Date: 2017/10/17 17:35
  */
+
 public class RLog {
     private static final String TAG = "Router";
     private static boolean sLoggable = false;

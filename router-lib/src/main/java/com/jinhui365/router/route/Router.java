@@ -70,6 +70,16 @@ public class Router extends AbsRouter {
         return build(path == null ? null : Uri.parse(path));
     }
 
+    /**
+     * 注解参数
+     *
+     * @param object
+     */
+    public void injectParams(Object object) {
+
+    }
+
+
     @Override
     public void go(Context context) {
         doing(context);

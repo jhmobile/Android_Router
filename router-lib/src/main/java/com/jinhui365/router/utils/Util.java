@@ -11,8 +11,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Created by 1 on 2017/10/10.
+ * Name:Util
+ * Author:jmtian
+ * Commemt:router util class
+ * Date: 2017/10/17 17:34
  */
+
 
 public class Util {
     private static final String TAG = "Util";
