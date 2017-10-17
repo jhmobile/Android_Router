@@ -1,4 +1,4 @@
-# Android_Router
+# Android_Router#
 ##通过一个url地址访问Android页面##
 ##一，目标##
 ###1.嵌套跳转，解决配置文件重复配置
@@ -10,8 +10,8 @@
 ###4.支持传递自定义Serializable对象###
 ###5.增加跳转结果的回调###
 
-##二，配置文件格式
-    <pre><code>
+##二，配置文件格式##
+<pre><code>
     {
         "/deal/buy-detail": [//路由url
         {
@@ -93,7 +93,7 @@
         }
         ],
     }
-    </code></pre>
+</code></pre>
 
 ##三，API使用##
 
