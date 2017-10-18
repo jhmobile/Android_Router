@@ -1,11 +1,13 @@
 # Android_Router
 ### 通过一个url地址访问Android页面</p>
 ## 一，目标
-1.嵌套跳转，解决配置文件重复配置   例： 跳购买需要登录绑卡，绑卡需要登录，购买前置条件只需要配置绑卡。考虑方案：应用初始化，初始化所有前置条件，通过优先级控制执行顺序，flag标记是否执行业务代码。</p>
+1.支持嵌套跳转，解决配置文件重复配置   例： 跳购买需要登录绑卡，绑卡需要登录，购买前置条件只需要配置绑卡。考虑方案：多层嵌套之间实现父子关系关联。</p>
 2.跳转采用链式调用。</p>
-3.页面路径，页面所需参数，前置条件 采用注解的形式，前置条件热更放在配置文件中。配置文件中仅配置需要修改的业务，其余页面配置使用注解，配置在类中。
-4.支持传递自定义Serializable对象
-5.增加跳转结果的回调
+3.页面路径，页面所需参数，前置条件 采用注解的形式，前置条件热更放在配置文件中。配置文件中仅配置需要修改的业务，其余页面配置使用注解，配置在类中。</p>
+4.支持传递自定义Serializable对象</p>
+5.增加跳转结果的回调</p>
+6.增加打开目标页的方式，1，startActivity 2，startActivityForResult</p>
+7.动画配置
 
 ## 二，配置文件格式
 <pre><code>
@@ -94,8 +96,8 @@
 
 ## 三，API使用
 
-### 1，初始化(###### 注：最好是在Application里面进行初始化)：
-    Router.getInstance().initialize(configJsonString);//configJsonString指配置文件转换的json，可以为空，例如：Router.initialize(null)
+### 1，初始化( 注：最好是在Application里面进行初始化)：
+    Router.getInstance().initialize(configJsonString);//configJsonString指配置文件读出的json，可以为空。例如：Router.initialize(null)
 
 ### 2，调用路由API
 
@@ -234,7 +236,7 @@
         public class CoolBuyDetailActivity{
             @Param
             String type;
-            @Param(name = "productCode")//注解不定义name，默认和属性名相同，如果定义neme，就通过重命名的name获取值
+            @Param(name = "productCode")//注解不定义name，默认和属性名相同，如果定义name，就通过重命名的name获取值
             int code;
 
             @Override
@@ -245,9 +247,9 @@
 
         }
 
-#### (4),路由API的调用详解，所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
+#### (4),注解如果配置了配置文件或者以以上第(3)步注解形势定义完成，就可以直接调用路由API；所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
 
-##### 1>.路由直接跳转，如下：
+##### 1>.路由直接跳转，不需要任何配置API，如下：
         Router.getInstance().build("/login")//路由地址
                             .go(context);
 
@@ -289,9 +291,7 @@
                             .addInterceptors("loginInterceptor","BindCardInterceptor");
                             .go(context);
 
-###### 注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有改API的调用，则后面无论添加多
-少个拦截器，都是无效的；如果调用的是.skipInterceptors("loginInterceptor")含参数的API，则只会移除指定的拦截器，如果
-后面有.addInterceptors("loginInterceptor")的调用，依然会执行。 ######
+###### 注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有改API的调用，则后面无论添加多少个拦截器，都是无效的；如果调用的是.skipInterceptors("loginInterceptor")含参数的API，则只会移除指定的拦截器，如果后面有.addInterceptors("loginInterceptor")的调用，依然会执行。
 
 ##### 5>.跳转需要在当前页的ActivityForResult里面接收数据:
         //例1：

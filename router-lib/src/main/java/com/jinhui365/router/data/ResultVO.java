@@ -1,8 +1,6 @@
 package com.jinhui365.router.data;
 
 import android.util.Log;
-
-import com.google.gson.annotations.SerializedName;
 import com.jinhui365.router.interceptor.InterceptorImpl;
 import com.jinhui365.router.route.RouteContext;
 
@@ -25,6 +23,7 @@ public class ResultVO implements Serializable {
 
     private String activity;//activity Class
     private Map<String, Object> params;//传入activity的参数
+    private String group;//路由所属分组
     private List<InterceptorVO> interceptors;//拦截器数组
     private ContextVO rContext;//路由控制器
 
@@ -45,6 +44,14 @@ public class ResultVO implements Serializable {
 
     public void setParams(Map<String, Object> params) {
         this.params = params;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public List<InterceptorVO> getInterceptors() {

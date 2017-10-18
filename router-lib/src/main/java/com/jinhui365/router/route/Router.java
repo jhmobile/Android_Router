@@ -1,18 +1,12 @@
 package com.jinhui365.router.route;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-
-import com.jinhui365.router.annotation.Route;
-import com.jinhui365.router.data.ResultVO;
 import com.jinhui365.router.utils.GsonUtils;
-import com.jinhui365.router.utils.RLog;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -25,20 +19,11 @@ import java.util.Set;
  * Date: 2017/8/16 11:24
  */
 
-public class Router extends AbsRouter {
+public class Router {
     private static final String TAG = "Router";
     public static final String RAW_URI = "raw_uri";
 
-    private RouteContext parentContext;
     private RouteContext currentContext;
-
-    public RouteContext getParentContext() {
-        return parentContext;
-    }
-
-    public void setParentContext(RouteContext parentContext) {
-        this.parentContext = parentContext;
-    }
 
     public RouteContext getCurrentContext() {
         return currentContext;
@@ -66,8 +51,12 @@ public class Router extends AbsRouter {
         RouteManager.getInstance().init(configJsonString);
     }
 
-    public AbsRouter build(String path) {
+    public ConfigRouter build(String path) {
         return build(path == null ? null : Uri.parse(path));
+    }
+
+    public ConfigRouter build(Uri uri) {
+        return new ConfigRouter().build(uri);
     }
 
     /**
@@ -77,81 +66,6 @@ public class Router extends AbsRouter {
      */
     public void injectParams(Object object) {
 
-    }
-
-
-    @Override
-    public void go(Context context) {
-        doing(context);
-    }
-
-    /**
-     * 路由数据处理
-     */
-    private void doing(Context context) {
-        if (mRouteRequest.getUri() == null) {
-            callback(RouteResult.FAILED, "uri == null.");
-        }
-
-        ResultVO resultVO = RouteManager.getInstance().getResultVOByRoutePath(mRouteRequest.getUri().getPath());
-        if (null == resultVO) {
-            callback(RouteResult.FAILED, "resultVO == null.");
-        }
-        if (null != resultVO.getParams() && !resultVO.getParams().isEmpty()) {
-            mRouteRequest.getParams().putAll(resultVO.getParams());
-        }
-
-        if (null == resultVO.getRContext()) {
-            currentContext = getRouteContext(resultVO, context);
-        } else {
-            currentContext = new RouteContext(mRouteRequest, context);
-        }
-        currentContext.setParent(parentContext);
-        if (null != parentContext) {
-            parentContext.addChild(currentContext);
-        }
-        currentContext.next();
-    }
-
-    /**
-     * one router of context's class
-     *
-     * @param resultVO
-     * @param context
-     * @return
-     */
-    private RouteContext getRouteContext(ResultVO resultVO, Context context) {
-        if (null != resultVO.getRContext().getOptions() && resultVO.getRContext().getOptions().isEmpty()) {
-            mRouteRequest.getOptions().putAll(resultVO.getRContext().getOptions());
-        }
-
-        Class clazz = resultVO.getRContext().getClazz();
-        if (null != clazz) {
-            try {
-                currentContext = (RouteContext) clazz.getConstructor(new Class[]{ResultVO.class, Context.class}).newInstance(new Object[]{resultVO, context});
-            } catch (Exception var) {
-                currentContext = new RouteContext(mRouteRequest, context);
-            }
-        } else {
-            currentContext = new RouteContext(mRouteRequest, context);
-        }
-
-        return currentContext;
-    }
-
-    /**
-     * 路由处理回调
-     *
-     * @param result
-     * @param msg
-     */
-    public void callback(RouteResult result, String msg) {
-        if (result != RouteResult.SUCCEED) {
-            RLog.w(msg);
-        }
-        if (mRouteRequest.getCallback() != null) {
-            mRouteRequest.getCallback().callback(result, mRouteRequest.getUri(), msg);
-        }
     }
 
     /**
@@ -173,10 +87,11 @@ public class Router extends AbsRouter {
     }
 
     public void interceptorForSkipResult(boolean isBreak, Map<String, Object> map) {
-        if (null == parentContext) {
+        if (null == currentContext || null == currentContext.getParent()) {
             return;
         }
-        parentContext.skipResultCallBack(isBreak, map);
+
+        currentContext.getParent().skipResultCallBack(isBreak, map);
     }
 
     /**
