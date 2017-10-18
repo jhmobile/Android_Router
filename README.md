@@ -12,85 +12,93 @@
 ## 二，配置文件格式
 <pre><code>
     {
-        "/deal/buy-detail": [//路由url
-        {
-            "condition": {//一对多的时候，路由的精确匹配条件，可以为空
-                "type": "spirit",
-                "rateType": "unfix"
-            },
-            "result": {//路由匹配结果
-                "activity": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",//跳转目标类
-                "params": {//跳转参数
-                    "arriveType": "spirit"
-                },
-                "group":"deal"//路由所属组
-                "interceptors": [//路由需要的拦截器，这里只描述当前除组拦截器之外的拦截器
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",//具体拦截器
-                    "params": {},//拦截器需要的参数
-                    "options": {}//拦截器需要的配置
-                },
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
-                    "params": {},
-                    "options": {}
-                },
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                    "params": {},
-                    "options": {}
-                }
-                ],
-                "rContext": {//当前路由的上下文管理类，可以不写，默认系统的RouteContext
-                    "clazz": "com.jinhui365.router.route.RouteContext",
-                    "options": {//上下文管理类配置项，默认是从传递参数里面去掉配置里面包含的参数，
-                        "detailVO": ""
-                    }
-                }
-            }
+        "/deal":{
+             "interceptors": [//路由需要的拦截器，这里只描述当前除组拦截器之外的拦截器
+                            {
+                                "name":"loginInterceptor"
+                                "interceptorClazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",//具体拦截器
+                                "params": {},//拦截器需要的参数
+                                "options": {}//拦截器需要的配置
+                            },
+                            {
+                                "interceptorClazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
+                                "params": {},
+                                "options": {}
+                            }
+                            ],
+             "route":{
+                "/buy-detail": [//路由url
+                     {
+                         "condition": {//一对多的时候，路由的精确匹配条件，可以为空
+                             "type": "spirit",
+                             "rateType": "unfix"
+                         },
+                         "result": {//路由匹配结果
+                             "activity": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",//跳转目标类
+                             "params": {//跳转参数
+                                 "arriveType": "spirit"
+                             },
+                             "interceptors": [//路由需要的拦截器，这里只描述当前除组拦截器之外的拦截器
+                             {
+                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
+                                 "params": {},
+                                 "options": {}
+                             }
+                             ],
+                             "rContext": {//当前路由的上下文管理类，可以不写，默认系统的RouteContext
+                                 "clazz": "com.jinhui365.router.route.RouteContext",
+                                 "options": {//上下文管理类配置项，默认是从传递参数里面去掉配置里面包含的参数，
+                                     "detailVO": ""
+                                 }
+                             }
+                         }
+                     },
+                     {
+                         "result": {
+                             "activity": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
+                             "params": {
+                                 "arriveType": "opencash"
+                             },
+                             "interceptors": [
+                             {
+                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
+                                 "params": {
+                                     "state": "-1"
+                                 },
+                                 "options": {
+                                     "url1": "/user/qualified",
+                                     "url2": "/user/unqualified"
+                                 }
+                             },
+                             {
+                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
+                                 "params": {},
+                                 "options": {}
+                             }
+                             ],
+                             "rContext": {
+                                 "clazz": "com.jinhui365.router.route.RouteContext",
+                                 "options": {
+                                     "detailVO": ""
+                                 }
+                             }
+                         }
+                     }
+                     ],
+             }
         },
-        {
-            "result": {
-                "activity": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
-                "params": {
-                    "arriveType": "opencash"
-                },
-                "interceptors": [
+        "/":{
+            "route":{
+                "/login":[
                 {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",
-                    "params": {},
-                    "options": {}
-                },
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
-                    "params": {},
-                    "options": {}
-                },
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
-                    "params": {
-                        "state": "-1"
-                    },
-                    "options": {
-                        "url1": "/user/qualified",
-                        "url2": "/user/unqualified"
-                    }
-                },
-                {
-                    "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                    "params": {},
-                    "options": {}
-                }
-                ],
-                "rContext": {
-                    "clazz": "com.jinhui365.router.route.RouteContext",
-                    "options": {
-                        "detailVO": ""
+                   "result": {
+                       "activity": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
                     }
                 }
+                ]
             }
         }
-        ],
+
     }
 </code></pre>
 

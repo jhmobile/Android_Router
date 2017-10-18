@@ -23,7 +23,6 @@ public class ResultVO implements Serializable {
 
     private String activity;//activity Class
     private Map<String, Object> params;//传入activity的参数
-    private String group;//路由所属分组
     private List<InterceptorVO> interceptors;//拦截器数组
     private ContextVO rContext;//路由控制器
 
@@ -44,14 +43,6 @@ public class ResultVO implements Serializable {
 
     public void setParams(Map<String, Object> params) {
         this.params = params;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
     }
 
     public List<InterceptorVO> getInterceptors() {
