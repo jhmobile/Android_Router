@@ -1,11 +1,11 @@
 package com.jinhui365.router.route;
 
-import android.text.TextUtils;
-
-import com.jinhui365.router.data.ResultVO;
 import com.jinhui365.router.data.RouteItemVO;
+import com.jinhui365.router.data.RouteVO;
+import com.jinhui365.router.interceptor.InterceptorImpl;
 import com.jinhui365.router.utils.GsonUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +19,7 @@ import java.util.Map;
 public class RouteManager {
     private static final String TAG = "RouteManager";
 
-    private Map<String, List<RouteItemVO>> configRouteMap;
-    private Map<String, List<RouteItemVO>> annotationRouteMap;
+    private Map<String, RouteVO> configRouteMap;
 
     private static final RouteManager instance = new RouteManager();
 
@@ -37,12 +36,14 @@ public class RouteManager {
      * @param pageJsonString
      */
     public void init(String pageJsonString) {
-        if (TextUtils.isEmpty(pageJsonString)) {//初始化注解，只需要启动应用的时候进行初始化
+        //初始化默认配置文件
+        configRouteMap = GsonUtils.jsonToMap(pageJsonString, String.class, RouteVO.class);
+    }
 
-        }
-
-        //初始化热更获取的配置文件
-        configRouteMap = GsonUtils.jsonToMapList(pageJsonString, String.class, RouteItemVO.class);
+    //合并传递过来的部分配置文件
+    public void mergeConfig(String jsonString) {
+        Map<String, RouteVO> newMap = GsonUtils.jsonToMap(jsonString, String.class, RouteVO.class);
+        configRouteMap.putAll(newMap);
     }
 
     /**
@@ -51,29 +52,21 @@ public class RouteManager {
      * @param path
      * @return
      */
-    public ResultVO getResultVOByRoutePath(String path) {
+    public RouteVO getResultVOByRoutePath(String path) {
         return getResultVOByRoutePath(path, null);
     }
 
     /**
-     * 根据path 和params获取ResultVO
+     * 根据path 和params获取RouteVO
      *
      * @param path
      * @param params
      * @return
      */
-    public ResultVO getResultVOByRoutePath(String path, Map<String, String> params) {
-        Map<String, List<RouteItemVO>> routeMap = getRouteMap();
-        if (TextUtils.isEmpty(path) || null == routeMap || routeMap.isEmpty()) {
-            return null;
-        }
+    public RouteVO getResultVOByRoutePath(String path, Map<String, String> params) {
+        RouteVO routeVO = new RouteVO();
 
-        ResultVO itemVO = null;
-        if (routeMap.containsKey(path)) {
-            List<RouteItemVO> list = routeMap.get(path);
-            itemVO = getResultVOByCondition(list, params);
-        }
-        return itemVO;
+        return routeVO;
     }
 
     /**
@@ -83,50 +76,52 @@ public class RouteManager {
      * @param params
      * @return
      */
-    private ResultVO getResultVOByCondition(List<RouteItemVO> list, Map<String, String> params) {
-        ResultVO resultVO = null;
-        if (null == list || list.isEmpty()) {
-            return null;
-        }
-        for (int i = 0; i < list.size(); i++) {
-            boolean isExist = true;
-            RouteItemVO itemVO = list.get(i);
-            Map<String, String> map = itemVO.getCondition();
-            if (null != map && !map.isEmpty()) {
-                for (String key : map.keySet()) {
-                    String value = map.get(key);
-                    String valueParams = params.get(key);
-                    if (null == value || null == valueParams || !value.equals(valueParams)) {
-                        isExist = false;
-                        break;
-                    }
-                }
-            }
-            if (isExist) {
-                resultVO = itemVO.getResult();
-                break;
-            }
-        }
-        if (null != resultVO && null != params && !params.isEmpty()) {
-            Map<String, Object> map = resultVO.getParams();
-            map.putAll(params);
-        }
+    private RouteVO getResultVOByCondition(List<RouteItemVO> list, Map<String, String> params) {
+        RouteVO resultVO = null;
+
         return resultVO;
     }
 
     /**
-     * 获取路由信息初始化数据集合
+     * 根据下标获取验证类
      *
+     * @param index
      * @return
      */
-    private Map<String, List<RouteItemVO>> getRouteMap() {
-        Map<String, List<RouteItemVO>> map = new HashMap<>();
-        if (null != annotationRouteMap && !annotationRouteMap.isEmpty()) {
-            map.putAll(annotationRouteMap);
-        }
-        if (null != configRouteMap && !configRouteMap.isEmpty()) {
-            map.putAll(configRouteMap);
-        }
-        return map;
+    public InterceptorImpl getInterceptorByIndex(RouteContext context, int index) {
+//        if (null == interceptors || interceptors.isEmpty()) {
+//            return null;
+//        }
+//        if (index < interceptors.size()) {
+//            InterceptorVO interceptorVO = interceptors.get(index);
+//            try {
+//                InterceptorImpl vo = interceptorVO.getInterceptorClazz()
+//                        .getConstructor(RouteContext.class, Map.class, Map.class)
+//                        .newInstance(context, interceptorVO.getParams(), interceptorVO.getOptions());
+//                return vo;
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+        return null;
     }
+
+    /**
+     * 实例化Interceptor集合
+     *
+     * @param routeContext
+     * @return
+     */
+    public List<InterceptorImpl> getInterceptors(RouteContext routeContext) {
+//        List<InterceptorImpl> list = new ArrayList<>();
+//        if (null == interceptors || interceptors.isEmpty()) {
+//            return list;
+//        }
+//        for (int i = 0; i < interceptors.size(); i++) {
+//            list.add(getInterceptorByIndex(routeContext, i));
+//        }
+        return null;
+    }
+
+
 }

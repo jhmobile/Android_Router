@@ -3,6 +3,8 @@ package com.jinhui365.router.route;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import com.jinhui365.router.data.RouteItemVO;
+import com.jinhui365.router.data.RouteVO;
 import com.jinhui365.router.interceptor.InterceptorImpl;
 
 import java.io.Serializable;
@@ -32,13 +34,13 @@ public class RouteRequest implements Serializable {
     // skip all the interceptors
     private boolean skipInterceptors;
     // skip some interceptors temporarily
-    @Nullable
-    private List<String> removedInterceptors;
+    private List<RouteItemVO> removedInterceptors;
     // add some interceptors temporarily
     @Nullable
-    private List<String> addedInterceptors;
+    private List<RouteItemVO> addedInterceptors;
     @Nullable
     private RouteCallback callback;
+    private IErrorHandler handler;
     private int requestCode = INVALID_REQUEST_CODE;
     private int enterAnim;
     private int exitAnim;
@@ -115,33 +117,27 @@ public class RouteRequest implements Serializable {
     }
 
     @Nullable
-    public List<String> getAddedInterceptors() {
+    public List<RouteItemVO> getAddedInterceptors() {
         return addedInterceptors;
     }
 
     @Nullable
-    public List<String> getRemovedInterceptors() {
+    public List<RouteItemVO> getRemovedInterceptors() {
         return removedInterceptors;
     }
 
-    public void addInterceptors(String... interceptors) {
-        if (interceptors == null || interceptors.length <= 0) {
-            return;
-        }
+    public void addInterceptors(Class<InterceptorImpl> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
         if (this.addedInterceptors == null) {
-            this.addedInterceptors = new ArrayList<>(interceptors.length);
+            this.addedInterceptors = new ArrayList<>();
         }
-        this.addedInterceptors.addAll(Arrays.asList(interceptors));
+        this.addedInterceptors.add(new RouteItemVO());
     }
 
-    public void removeInterceptors(String... interceptors) {
-        if (interceptors == null || interceptors.length <= 0) {
-            return;
-        }
+    public void removeInterceptors(Class<InterceptorImpl>... interceptors) {
         if (this.removedInterceptors == null) {
-            this.removedInterceptors = new ArrayList<>(interceptors.length);
+            this.removedInterceptors = new ArrayList<>();
         }
-        this.removedInterceptors.addAll(Arrays.asList(interceptors));
+        this.removedInterceptors.add(new RouteItemVO());
     }
 
     @Nullable
@@ -151,6 +147,14 @@ public class RouteRequest implements Serializable {
 
     public void setCallback(@Nullable RouteCallback callback) {
         this.callback = callback;
+    }
+
+    public IErrorHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(IErrorHandler handler) {
+        this.handler = handler;
     }
 
     public int getRequestCode() {

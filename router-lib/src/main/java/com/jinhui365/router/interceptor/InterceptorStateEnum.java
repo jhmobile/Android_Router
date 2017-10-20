@@ -9,10 +9,10 @@ package com.jinhui365.router.interceptor;
 
 
 public enum InterceptorStateEnum {
-    STATE_DEFAULT,//未验证
-    STATE_SUCCESS,//验证成功
-    STATE_FAIL,//验证失败
-    STATE_PENDING,//验证进行中
+    DEFAULT,//未验证
+    SUCCESS,//验证成功
+    FAIL,//验证失败
+    PENDING,//验证进行中
 
     InterceptorStateEnum() {
 

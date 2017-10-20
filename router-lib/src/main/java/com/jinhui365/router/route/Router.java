@@ -3,6 +3,8 @@ package com.jinhui365.router.route;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+
+import com.jinhui365.router.interceptor.InterceptorStateEnum;
 import com.jinhui365.router.utils.GsonUtils;
 
 import java.util.HashMap;
@@ -25,12 +27,21 @@ public class Router {
 
     private RouteContext currentContext;
 
+    private IErrorHandler handler;
+
     public RouteContext getCurrentContext() {
         return currentContext;
     }
 
     public void setCurrentContext(RouteContext currentContext) {
         this.currentContext = currentContext;
+    }
+    public IErrorHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(IErrorHandler handler) {
+        this.handler = handler;
     }
 
     private static final Router instance = new Router();
@@ -47,75 +58,98 @@ public class Router {
      *
      * @param configJsonString
      */
-    public void initialize(String configJsonString) {
+    public void initialize(String configJsonString, IErrorHandler handler) {
+        this.handler = handler;
         RouteManager.getInstance().init(configJsonString);
     }
 
-    public ConfigRouter build(String path) {
+    /**
+     * merge new config of the config's parts to default's config
+     *
+     * @param jsonString
+     */
+    public void mergeConfig(String jsonString) {
+        RouteManager.getInstance().mergeConfig(jsonString);
+    }
+
+    /**
+     * build routing by path
+     *
+     * @param path
+     * @return
+     */
+    public RouteContextBuilder build(String path) {
         return build(path == null ? null : Uri.parse(path));
     }
 
-    public ConfigRouter build(Uri uri) {
-        return new ConfigRouter().build(uri);
-    }
-
     /**
-     * 注解参数
+     * build routing by Uri
      *
-     * @param object
+     * @param uri
+     * @return
      */
-    public void injectParams(Object object) {
-
+    public RouteContextBuilder build(Uri uri) {
+        return new RouteContextBuilder().build(uri);
     }
 
     /**
-     * 拦截验证完回调
+     * 拦截器执行完毕，回调路由库
      */
-    public void interceptorForSkipResult(boolean isBreak) {
-        interceptorForSkipResult(isBreak, "");
+    public void interceptorForSkipResult(InterceptorStateEnum state) {
+        interceptorForSkipResult(state, "");
     }
 
-    public void interceptorForSkipResult(boolean isBreak, String json) {
+
+    public void interceptorForSkipResult(InterceptorStateEnum state, String json) {
         Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
-        interceptorForSkipResult(isBreak, map);
+        interceptorForSkipResult(state, map);
     }
 
-    public void interceptorForSkipResult(boolean isBreak, String key, Object value) {
+    public void interceptorForSkipResult(InterceptorStateEnum state, String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
-        interceptorForSkipResult(isBreak, map);
+        interceptorForSkipResult(state, map);
     }
 
-    public void interceptorForSkipResult(boolean isBreak, Map<String, Object> map) {
+    public void interceptorForSkipResult(InterceptorStateEnum state, Map<String, Object> map) {
         if (null == currentContext || null == currentContext.getParent()) {
             return;
         }
 
-        currentContext.getParent().skipResultCallBack(isBreak, map);
+        currentContext.getParent().skipResultCallBack(state, map);
     }
 
     /**
-     * 返回起始页面
+     * 通过路由库调用的页面，返回上一个页面
      *
      * @param context
      */
-    public void goBackFromContext(Context context) {
-        goBackFromContext(context, "");
+    public void goBack(Context context) {
+        goBack(context, "");
     }
 
-    public void goBackFromContext(Context context, String json) {
+    public void goBack(Context context, String json) {
         Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
-        goBackFromContext(context, map);
+        goBack(context, map);
     }
 
-    public void goBackFromContext(Context context, String key, Object value) {
+    public void goBack(Context context, String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
-        goBackFromContext(context, map);
+        goBack(context, map);
     }
 
-    public void goBackFromContext(Context context, Map<String, Object> map) {
+    public void goBack(Context context, Map<String, Object> map) {
         Intent intent = new Intent();
 
+    }
+
+    /**
+     * 通过路由库跳转的目的页，可以在目的页获取当前页面uri
+     *
+     * @return
+     */
+    public String getCurrentUri() {
+        return "";
     }
 }

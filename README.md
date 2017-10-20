@@ -1,4 +1,14 @@
 # Android_Router
+
+## 会议记录：
+1，错误页面处理：初始化一个默认页面，API可以调用错误接口重新设置
+2,conditions 如何避免使用数组描述
+3，检查脚本实例（库完成之后再写）
+4，添加一个merge配置文件api
+5，动态添加拦截器，参数类型是class
+6，回调给库添加成功，失败，pending状态
+
+
 ### 通过一个url地址访问Android页面</p>
 ## 一，目标
 1.支持嵌套跳转，解决配置文件重复配置   例： 跳购买需要登录绑卡，绑卡需要登录，购买前置条件只需要配置绑卡。考虑方案：多层嵌套之间实现父子关系关联。</p>
@@ -12,100 +22,102 @@
 ## 二，配置文件格式
 <pre><code>
     {
-        "/deal":{
-             "interceptors": [//路由需要的拦截器，这里只描述当前除组拦截器之外的拦截器
-                            {
-                                "name":"loginInterceptor"
-                                "interceptorClazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",//具体拦截器
-                                "params": {},//拦截器需要的参数
-                                "options": {}//拦截器需要的配置
-                            },
-                            {
-                                "interceptorClazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
-                                "params": {},
-                                "options": {}
-                            }
-                            ],
-             "route":{
-                "/buy-detail": [//路由url
-                     {
-                         "condition": {//一对多的时候，路由的精确匹配条件，可以为空
-                             "type": "spirit",
-                             "rateType": "unfix"
-                         },
-                         "result": {//路由匹配结果
-                             "activity": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",//跳转目标类
-                             "params": {//跳转参数
-                                 "arriveType": "spirit"
-                             },
-                             "interceptors": [//路由需要的拦截器，这里只描述当前除组拦截器之外的拦截器
-                             {
-                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                                 "params": {},
-                                 "options": {}
-                             }
-                             ],
-                             "rContext": {//当前路由的上下文管理类，可以不写，默认系统的RouteContext
-                                 "clazz": "com.jinhui365.router.route.RouteContext",
-                                 "options": {//上下文管理类配置项，默认是从传递参数里面去掉配置里面包含的参数，
-                                     "detailVO": ""
-                                 }
-                             }
-                         }
-                     },
-                     {
-                         "result": {
-                             "activity": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
-                             "params": {
-                                 "arriveType": "opencash"
-                             },
-                             "interceptors": [
-                             {
-                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
-                                 "params": {
-                                     "state": "-1"
-                                 },
-                                 "options": {
-                                     "url1": "/user/qualified",
-                                     "url2": "/user/unqualified"
-                                 }
-                             },
-                             {
-                                 "interceptorClazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                                 "params": {},
-                                 "options": {}
-                             }
-                             ],
-                             "rContext": {
-                                 "clazz": "com.jinhui365.router.route.RouteContext",
-                                 "options": {
-                                     "detailVO": ""
-                                 }
-                             }
-                         }
-                     }
-                     ],
-             }
-        },
-        "/":{
-            "route":{
-                "/login":[
-                {
-                   "result": {
-                       "activity": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
+        "deal": {
+            "interceptors": [
+              {
+                "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",
+                "params": {},
+                "options": {}
+              },
+              {
+                "clazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
+                "params": {},
+                "options": {}
+              }
+            ],
+            "subRoutes": {
+              "buy": {
+                "interceptors": [
+                  {
+                    "clazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
+                    "params": {},
+                    "options": {}
+                  }
+                ],
+                "subRoutes": {
+                  "detail?type=spirit&rateType=unfix": {
+                    "target": {
+                      "clazz": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",
+                      "params": {
+                        "arriveType": "spirit"
+                      }
+                    },
+                    "routeContext": {
+                      "clazz": "com.jinhui365.router.route.RouteContext",
+                      "options": {
+                        "detailVO": ""
+                      }
                     }
+                  },
+                  "detail?type=opencashNew": {
+                    "target": {
+                      "clazz": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
+                      "params": {
+                        "arriveType": "opencashNew"
+                      }
+                    },
+                    "routeContext": {
+                      "clazz": "com.jinhui365.router.route.RouteContext",
+                      "options": {
+                        "detailVO": ""
+                      }
+                    }
+                  },
+                  "detail":{
+                    "interceptors":[
+                      {
+                        "clazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
+                        "params": {
+                          "state": "-1"
+                        },
+                        "options": {
+                          "url1": "/user/qualified",
+                          "url2": "/user/unqualified"
+                        }
+                      }
+                    ],
+                    "target":{
+                      "clazz": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
+                    },
+                    "routeContext": {
+                      "clazz": "com.jinhui365.router.route.RouteContext",
+                      "options": {
+                        "detailVO": ""
+                      }
+                    }
+                  }
                 }
-                ]
+              },
+              "withdraw": {
+                "target": {
+                  "clazz": "com.rxhui.pay.business.deal.withdraw.WithdrawCurrentActivity",
+                  "params": {}
+                }
+              }
             }
-        }
-
+          },
+          "login":{
+            "target":{
+              "clazz": "com.rxhui.pay.business.auth.UserLoginActivity"
+            }
+          }
     }
 </code></pre>
 
 ## 三，API使用
 
 ### 1，初始化( 注：最好是在Application里面进行初始化)：
-    Router.getInstance().initialize(configJsonString);//configJsonString指配置文件读出的json，可以为空。例如：Router.initialize(null)
+    Router.getInstance().initialize(configJsonString,iErrorHandler);//configJsonString指默认配置文件读出的json，不可以为空。iErrorHandler只默认错误处理，可以为空，例如：Router.getInstance().initialize(configJsonString,null);
 
 ### 2，调用路由API
 

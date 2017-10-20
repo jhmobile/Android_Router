@@ -2,18 +2,15 @@ package com.jinhui365.router.route;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 
-import com.jinhui365.router.annotation.InjectContext;
 import com.jinhui365.router.interceptor.InterceptorImpl;
-import com.jinhui365.router.utils.RLog;
-import com.jinhui365.router.utils.Util;
+import com.jinhui365.router.interceptor.InterceptorStateEnum;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.jinhui365.router.interceptor.InterceptorStateEnum.DEFAULT;
 
 /**
  * Author:jmtian
@@ -23,7 +20,6 @@ import java.util.Map;
  * 包含了跳转需要的初始信息，包括但不限于发起跳转的源、跳转配置、跳转参数
  * 管理执行跳转过程中的运行时信息,前置条件的管理
  */
-@InjectContext(name = "routeContext")
 public class RouteContext {
     private static final String TAG = "RouteContext";
     /**
@@ -33,7 +29,6 @@ public class RouteContext {
 
     protected Context context;
     private RouteRequest routeRequest;
-    private Class targetClass;
     private List<InterceptorImpl> interceptors;//Interceptor集合
     private Map<String, Object> params;//跳转需要的参数
     private Map<String, Object> options;//baseContext子类需要的配置项参数
@@ -70,18 +65,9 @@ public class RouteContext {
     public RouteContext(RouteRequest routeRequest, Context context) {
         this.routeRequest = routeRequest;
         this.context = context;
-        this.targetClass = routeRequest.getTargetClass();
         this.interceptors = routeRequest.getInterceptors();
         this.params = routeRequest.getParams();
         this.options = routeRequest.getOptions();
-    }
-
-    public Class getTargetClass() {
-        return routeRequest.getTargetClass();
-    }
-
-    public void setTargetClass(Class targetClass) {
-        this.targetClass = targetClass;
     }
 
     public Context getContext() {
@@ -140,19 +126,6 @@ public class RouteContext {
     }
 
     /**
-     * 清楚垃圾数据，context  options里面对应key的数据不需要传递给intent
-     */
-    private void clearRubbishParams() {
-        if (options != null && !options.isEmpty() && params != null && !params.isEmpty()) {
-            for (String key : options.keySet()) {
-                if (params.containsKey(key)) {
-                    params.remove(key);
-                }
-            }
-        }
-    }
-
-    /**
      * 执行下一个前置条件
      */
     public void next() {
@@ -167,17 +140,17 @@ public class RouteContext {
     /**
      * 权限验证回调
      *
-     * @param isBreak 是否是打断
-     * @param map     回调传回的结果map
+     * @param state 回调状态
+     * @param map   回调参数
      */
-    public void skipResultCallBack(boolean isBreak, Map<String, Object> map) {
+    public void skipResultCallBack(InterceptorStateEnum state, Map<String, Object> map) {
         InterceptorImpl currentInterceptor = getCurrentInterceptor();
         if (currentInterceptor != null) {
             if (null != map && !map.isEmpty()) {
                 currentInterceptor.getParams().putAll(map);
             }
-            // 如果是打断,执行break,否则执行after，验证状态
-            if (isBreak) {
+            // 回调是默认状态，则代表打断
+            if (DEFAULT.equals(state)) {
                 currentInterceptor.onBreak();
             } else {
                 currentInterceptor.onAfter();
@@ -190,59 +163,10 @@ public class RouteContext {
      * 默认实现是创建新的控制器对象并直接跳转
      * 如果需要可以直接跳转
      */
-    protected void gotoTarget() {
-        Intent intent = assembleFlagsIntent();
-        if (intent == null) {
-            return;
-        }
+    private void gotoTarget() {
+        Router.getInstance().setCurrentContext(parent);
+//        callback(RouteState.SUCCEED, null);
 
-        if (context instanceof Activity) {
-            if (routeRequest.getRequestCode() > 0) {
-                ActivityCompat.startActivityForResult((Activity) context, intent, routeRequest.getRequestCode(), null);
-            } else {
-                ActivityCompat.startActivity((Activity) context, intent, null);
-            }
-            assembleAnim();
-        }
-        Router.getInstance().setParentContext(parent);
-        Router.getInstance().callback(RouteResult.SUCCEED, null);
-    }
-
-    protected Intent getIntent() {
-        if (null == targetClass) {
-            RLog.e("no targetClass");
-            return null;
-        }
-        Intent intent = new Intent();
-        clearRubbishParams();
-        Bundle bundle = new Bundle();
-        if (params != null && !params.isEmpty()) {
-            for (String key : params.keySet()) {
-                bundle.putAll(Util.getBundle(bundle, key, params.get(key)));
-            }
-        }
-        intent.setClass(context, targetClass);
-        return intent;
-    }
-
-    /**
-     * 设置跳转动画
-     */
-    protected void assembleAnim() {
-        if (context instanceof Activity) {
-            if (routeRequest.getEnterAnim() != 0 && routeRequest.getExitAnim() != 0) {
-                // Add transition animation.
-                ((Activity) context).overridePendingTransition(
-                        routeRequest.getEnterAnim(), routeRequest.getExitAnim());
-            }
-
-        }
-    }
-
-    protected Intent assembleFlagsIntent() {
-        Intent intent = getIntent();
-        intent.addFlags(routeRequest.getFlags());
-        return intent;
     }
 
 }

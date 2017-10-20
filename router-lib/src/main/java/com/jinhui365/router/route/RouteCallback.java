@@ -1,7 +1,5 @@
 package com.jinhui365.router.route;
 
-import android.net.Uri;
-
 /**
  * Name:RouteCallback
  * Author:jmtian
@@ -11,11 +9,9 @@ import android.net.Uri;
 
 public interface RouteCallback {
     /**
-     * Callback
+     * callback
      *
-     * @param state   {@link RouteResult}
-     * @param uri     Uri
-     * @param message notice msg
+     * @param response
      */
-    void callback(RouteResult state, Uri uri, String message);
+    void callback(RouteResponse response);
 }

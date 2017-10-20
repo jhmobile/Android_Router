@@ -37,9 +37,6 @@ dependencies {
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.android.support:appcompat-v7:23.0.0'
 
-    annotationProcessor project(':router-compiler')
-    compile project(':router-annotation')
-
 }
 task makeJar(type: Copy) {
     from('build/intermediates/bundles/release/')
