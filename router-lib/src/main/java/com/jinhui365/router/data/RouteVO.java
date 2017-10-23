@@ -13,13 +13,15 @@ import java.util.Map;
 
 
 public class RouteVO {
+    private static final String TAG = "RouteVO";
+
     private List<RouteItemVO> interceptors;
     private Map<String, RouteVO> subRoutes;
-    private RouteItemVO target;
-    private RouteItemVO routeContext;
+    private RouteItemVO matcher;//跳转匹配类
+    private Map<String, String> target;//路由目标
 
     public List<RouteItemVO> getInterceptors() {
-        if(null == interceptors || interceptors.isEmpty()){
+        if (null == interceptors || interceptors.isEmpty()) {
             interceptors = new ArrayList<>();
         }
         return interceptors;
@@ -35,5 +37,21 @@ public class RouteVO {
 
     public void setSubRoutes(Map<String, RouteVO> subRoutes) {
         this.subRoutes = subRoutes;
+    }
+
+    public RouteItemVO getMatcher() {
+        return matcher;
+    }
+
+    public void setMatcher(RouteItemVO matcher) {
+        this.matcher = matcher;
+    }
+
+    public Map<String, String> getTarget() {
+        return target;
+    }
+
+    public void setTarget(Map<String, String> target) {
+        this.target = target;
     }
 }

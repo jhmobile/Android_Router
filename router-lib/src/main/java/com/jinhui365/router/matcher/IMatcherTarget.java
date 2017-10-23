@@ -1,7 +1,5 @@
 package com.jinhui365.router.matcher;
 
-import android.content.Context;
-
 import com.jinhui365.router.route.RouteContext;
 
 /**
@@ -12,5 +10,5 @@ import com.jinhui365.router.route.RouteContext;
  */
 
 public interface IMatcherTarget {
-    void matcher(Context context, RouteContext routeContext);
+    void matcher(RouteContext routeContext);
 }

@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.jinhui365.router.interceptor.InterceptorStateEnum;
+import com.jinhui365.router.matcher.IMatcherTarget;
 import com.jinhui365.router.utils.GsonUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.jinhui365.router.interceptor.InterceptorStateEnum.DEFAULT;
 
 
 /**
@@ -28,6 +31,8 @@ public class Router {
     private RouteContext currentContext;
 
     private IErrorHandler handler;
+
+    private IMatcherTarget iTarget;
 
     public RouteContext getCurrentContext() {
         return currentContext;
@@ -58,8 +63,9 @@ public class Router {
      *
      * @param configJsonString
      */
-    public void initialize(String configJsonString, IErrorHandler handler) {
+    public void initialize(String configJsonString, IErrorHandler handler,IMatcherTarget iTarget) {
         this.handler = handler;
+        this.iTarget = iTarget;
         RouteManager.getInstance().init(configJsonString);
     }
 
@@ -95,6 +101,10 @@ public class Router {
     /**
      * 拦截器执行完毕，回调路由库
      */
+    public void interceptorForSkipResult() {
+        interceptorForSkipResult(DEFAULT, "");
+    }
+
     public void interceptorForSkipResult(InterceptorStateEnum state) {
         interceptorForSkipResult(state, "");
     }

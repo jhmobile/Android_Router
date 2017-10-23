@@ -27,7 +27,7 @@ public class RouteContext {
      */
     private int currentInterceptorIndex = -1;
 
-    protected Context context;
+    private Context context;
     private RouteRequest routeRequest;
     private List<InterceptorImpl> interceptors;//Interceptor集合
     private Map<String, Object> params;//跳转需要的参数
@@ -43,6 +43,37 @@ public class RouteContext {
         this.parent = parent;
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public RouteRequest getRouteRequest() {
+        return routeRequest;
+    }
+
+    public void setRouteRequest(RouteRequest routeRequest) {
+        this.routeRequest = routeRequest;
+    }
+
+    public void setInterceptors(List<InterceptorImpl> interceptors) {
+        this.interceptors = interceptors;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
+    }
+
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
+    }
+
+    public List<RouteContext> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<RouteContext> children) {
+        this.children = children;
+    }
 
     /**
      * add a child of RouteContext

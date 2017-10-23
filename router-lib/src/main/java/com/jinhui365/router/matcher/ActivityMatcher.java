@@ -25,15 +25,14 @@ public class ActivityMatcher implements IMatcherTarget {
     private static final String TAG = "ActivityMatcher";
 
     private Context context;
+    private RouteContext routeContext;
+    private RouteRequest routeRequest;
 
-    Map<String, Object> options;
-    Map<String, Object> params;
     @Override
-    public void matcher(Context context, RouteContext routeContext) {
-        this.context = context;
-        this.routeRequest = routeRequest;
-        options = routeRequest.getOptions();
-        params = routeRequest.getParams();
+    public void matcher(RouteContext routeContext) {
+        this.context = routeContext.getContext();
+        this.routeContext = routeContext;
+        this.routeRequest = routeContext.getRouteRequest();
         if (context instanceof Activity) {
             Intent intent = assembleFlagsIntent();
             if (intent == null) {
@@ -49,20 +48,40 @@ public class ActivityMatcher implements IMatcherTarget {
     }
 
     protected Intent getIntent() {
-        if (null == routeRequest.getTargetClass()) {
-            Log.e(TAG, "no targetClass");
+        if (null == routeRequest.getTarget() || routeRequest.getTarget().isEmpty()) {
+            Log.e(TAG, "no target");
             return null;
         }
-        Intent intent = new Intent();
-        clearRubbishParams();
-        Bundle bundle = new Bundle();
-        if (params != null && !params.isEmpty()) {
-            for (String key : params.keySet()) {
-                bundle.putAll(Util.getBundle(bundle, key, params.get(key)));
+        Class<?> targetClass = null;
+        if (routeRequest.getTarget().containsKey("clazz")) {
+            String clazzName = (String) routeRequest.getTarget().get("clazz");
+            targetClass = getActivityClass(clazzName);
+            Intent intent = new Intent();
+            clearRubbishParams();
+            Bundle bundle = new Bundle();
+            if (routeContext.getParams() != null && !routeContext.getParams().isEmpty()) {
+                for (String key : routeContext.getParams().keySet()) {
+                    bundle.putAll(Util.getBundle(bundle, key, routeContext.getParams().get(key)));
+                }
             }
+            intent.setClass(context, targetClass);
+            return intent;
         }
-        intent.setClass(context, targetClass);
-        return intent;
+        return null;
+    }
+
+    /**
+     * 获取activity对呀的class
+     *
+     * @return
+     */
+    protected Class<?> getActivityClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (Exception e) {
+            Log.e(TAG, "no activity class");
+        }
+        return null;
     }
 
     /**
@@ -89,15 +108,9 @@ public class ActivityMatcher implements IMatcherTarget {
     }
 
     /**
-     * 清楚垃圾数据，context  options里面对应key的数据不需要传递给intent
+     * 清楚垃圾数据
      */
     private void clearRubbishParams() {
-        if (options != null && !options.isEmpty() && params != null && !params.isEmpty()) {
-            for (String key : options.keySet()) {
-                if (params.containsKey(key)) {
-                    params.remove(key);
-                }
-            }
-        }
+
     }
 }

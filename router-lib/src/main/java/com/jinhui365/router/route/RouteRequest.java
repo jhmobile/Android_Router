@@ -26,7 +26,7 @@ public class RouteRequest implements Serializable {
 
     private Uri uri;
 
-    private Class targetClass;
+    private Map<String,Object> target;
     private Map<String, Object> params;
     private Map<String, Object> options;
     private int flags;
@@ -46,12 +46,12 @@ public class RouteRequest implements Serializable {
     private int exitAnim;
 
 
-    public Class getTargetClass() {
-        return targetClass;
+    public Map<String, Object> getTarget() {
+        return target;
     }
 
-    public void setTargetClass(Class targetClass) {
-        this.targetClass = targetClass;
+    public void setTarget(Map<String, Object> target) {
+        this.target = target;
     }
 
     public RouteRequest(Uri uri) {

@@ -1,33 +1,33 @@
 # Android_Router
 
-## 会议记录：
-1，错误页面处理：初始化一个默认页面，API可以调用错误接口重新设置
-2,conditions 如何避免使用数组描述
-3，检查脚本实例（库完成之后再写）
-4，添加一个merge配置文件api
-5，动态添加拦截器，参数类型是class
-6，回调给库添加成功，失败，pending状态
-
-
 ### 通过一个url地址访问Android页面</p>
 ## 一，目标
 1.支持嵌套跳转，解决配置文件重复配置   例： 跳购买需要登录绑卡，绑卡需要登录，购买前置条件只需要配置绑卡。考虑方案：多层嵌套之间实现父子关系关联。</p>
 2.跳转采用链式调用。</p>
-3.页面路径，页面所需参数，前置条件 采用注解的形式，前置条件热更放在配置文件中。配置文件中仅配置需要修改的业务，其余页面配置使用注解，配置在类中。</p>
+3.跳转路由采用分组管理</p>
 4.支持传递自定义Serializable对象</p>
 5.增加跳转结果的回调</p>
 6.增加打开目标页的方式，1，startActivity 2，startActivityForResult</p>
 7.动画配置
 
 ## 二，配置文件格式
+
+###注：格式简化版</p>
+    "第一层路由"：{
+        拦截器数组：
+        子路由：
+        目标匹配：
+        目标对象：
+    }
+
 <pre><code>
     {
-        "deal": {
-            "interceptors": [
+        "deal": {//每一层路由
+            "interceptors": [//每一层下面对应的拦截器数组
               {
-                "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",
-                "params": {},
-                "options": {}
+                "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",//拦截器类
+                "params": {},//拦截器需要传递的参数
+                "options": {}//拦截器需要的配置项
               },
               {
                 "clazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
@@ -35,7 +35,7 @@
                 "options": {}
               }
             ],
-            "subRoutes": {
+            "subRoutes": {//每一层下面的子路由
               "buy": {
                 "interceptors": [
                   {
@@ -44,37 +44,28 @@
                     "options": {}
                   }
                 ],
+                "matcher":{//当前路由层及下面各层需要的跳转目标匹配类
+                    "clazz":"com.rxhui.pay.application.gotopage.ActivityMatcher",//匹配类
+                    "options":{//匹配配置参数
+                        "detailVO:""
+                    }
+                }
                 "subRoutes": {
                   "detail?type=spirit&rateType=unfix": {
-                    "target": {
+                    "target": {//该层的目标信息，不同的跳转方式，匹配不同的参数
                       "clazz": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",
-                      "params": {
-                        "arriveType": "spirit"
-                      }
-                    },
-                    "routeContext": {
-                      "clazz": "com.jinhui365.router.route.RouteContext",
-                      "options": {
-                        "detailVO": ""
-                      }
+                      "arriveType": "spirit",
+                      "index:": "1"
                     }
                   },
                   "detail?type=opencashNew": {
                     "target": {
                       "clazz": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
-                      "params": {
-                        "arriveType": "opencashNew"
-                      }
-                    },
-                    "routeContext": {
-                      "clazz": "com.jinhui365.router.route.RouteContext",
-                      "options": {
-                        "detailVO": ""
-                      }
+                      "arriveType": "opencashNew"
                     }
                   },
-                  "detail":{
-                    "interceptors":[
+                  "detail": {
+                    "interceptors": [
                       {
                         "clazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
                         "params": {
@@ -86,190 +77,89 @@
                         }
                       }
                     ],
-                    "target":{
+                    "target": {
                       "clazz": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
-                    },
-                    "routeContext": {
-                      "clazz": "com.jinhui365.router.route.RouteContext",
-                      "options": {
-                        "detailVO": ""
-                      }
                     }
                   }
                 }
               },
               "withdraw": {
                 "target": {
-                  "clazz": "com.rxhui.pay.business.deal.withdraw.WithdrawCurrentActivity",
-                  "params": {}
+                  "clazz": "com.rxhui.pay.business.deal.withdraw.WithdrawCurrentActivity"
                 }
               }
             }
           },
-          "login":{
-            "target":{
+          "login": {
+            "target": {
               "clazz": "com.rxhui.pay.business.auth.UserLoginActivity"
             }
-          }
+          },
+          "deal/buy/detail":{
+
+              "interceptors": [
+                {
+                  "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",
+                  "params": {},
+                  "options": {}
+                },
+                {
+                  "clazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
+                  "params": {},
+                  "options": {}
+                },
+                {
+                  "clazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
+                  "params": {},
+                  "options": {}
+                },
+                {
+                  "clazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
+                  "params": {
+                    "state": "-1"
+                  },
+                  "options": {
+                    "url1": "/user/qualified",
+                    "url2": "/user/unqualified"
+                  }
+                }
+              ],
+              "target": {
+                "clazz": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
+              }
+            }
     }
 </code></pre>
+    配置文件的匹配方式：
+    默认找最全的路径匹配，如果匹配不到，就以组形势一级一级向下找，把每一级下面的信息都递归放入下面的对象中，组成最终目标需要的数据信息
 
 ## 三，API使用
 
 ### 1，初始化( 注：最好是在Application里面进行初始化)：
-    Router.getInstance().initialize(configJsonString,iErrorHandler);//configJsonString指默认配置文件读出的json，不可以为空。iErrorHandler只默认错误处理，可以为空，例如：Router.getInstance().initialize(configJsonString,null);
+    Router.getInstance().initialize(configJsonString,iErrorHandler,iMatcherTarget);
+    注：</p>
+        configJsonString指默认配置文件读出的json，不可以为空。
+        iErrorHandler指默认错误处理，可以为空，为空时默认错只打log，不做UI处理。
+        iMatcherTarget指默认使用跳转目标匹配类，可以为空，为空的时候，匹配库默认的activity跳转，也可以自己实现匹配跳转类，实现接口IMatcherTarget，后期库内会丰富多种跳转匹配
+        例如：
+        Router.getInstance().initialize(configJsonString,null，null);
+        Router.getInstance().initialize(configJsonString,null，new ActivityMatcher());
+        Router.getInstance().initialize(configJsonString,new IErrorHandler(){
+            @Override
+            public void onClientError(Context context, RouteResponse response){
+
+            }
+
+            @Override
+            public void onServerError(Context context, RouteResponse response){
+
+            }
+        }，new ActivityMatcher());
 
 ### 2，调用路由API
+        ##### 注：所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
 
-#### (1),最简单的调用,例如，登录：
-    Router.getInstance().build("/login").go(context);
-    //如果项目内使用配置文件形式，需要在配置文件配置：
-    "/login":[
-    {
-        "result":{
-           "activity": "...user.LoginActivity"
-        }
-    }]
-    //如果使用注解：
-    @Route(path = "/login")
-    public class LoginActivity{
-
-    }
-
-
-#### (2),配置文件的配置，如上第二步，不再具体描述。
-
-
-#### (3),注解的使用
-
-##### 1>.只需要一个地址的路由注解：
-        @Route(path = "/login")
-        public class LoginActivity{
-
-        }
-
-##### 2>.需要拦截器的路由注解：
-        @Route(path = "/deal/buy-detail",interceptors = {"loginInterceptor","bindCardInterceptor"})
-        public class FixBuyDetailActivity{
-
-        }
-
-        //登录拦截器注解实现
-        @Interceptor(name = "loginInterceptor")
-        public class LoginInterceptor extends InterceptorImpl{
-            @Override
-            public void checkoutState(InterceptorStateCallBack stateCallBack){
-                //登录状态检查，通过stateCallBack回调给库拦截器检查状态
-            }
-
-            @Override
-            public void onFailBefore(){
-                //首次检查失败，在该方法进行登录验证，调用登录路由
-                Router.getInstance().build("/login").go(context);
-            }
-        }
-
-        //绑卡拦截器，同上，不在放具体代码
-
-##### 3>.如果实现分组管理，第2>中的路由可以写成如下方式：
-         @Route(path = "/deal/buy-detail",group = DealGroup.class)
-         public class FixBuyDetailActivity{
-
-         }
-        //组的构建
-         public class DealGroup extends RouteGroup{
-            @Override
-            public String[] getInterceptor(){
-                String[] array = new String[]{"loginInterceptor","bindCardInterceptor"}
-                return array;
-            }
-         }
-
-##### 4>.如果实现分组管理，路由中还有其他拦截器，注解实现如下：
-        @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"})
-        public class FixBuyDetailActivity{
-
-        }
-
-        //如果拦截器中像配置文件一样需要配置参数，拦截器注解如下
-        @Interceptor(name = "webViewInterceptor"，params = "{\"state\":\"-1\"}",options = "{\"url1\":\"/a/b\",\"url2\":\"/a/c\"}")
-        public class WebViewInterceptor extends InterceptorImpl{
-               @Override
-               public void checkoutState(InterceptorStateCallBack stateCallBack){
-                    //异步获取状态，并回调给库
-               }
-
-               @Override
-               public void onFailBefore(){
-                   //检查失败，进入页面，进行验证
-               }
-        }
-
-##### 5>.如果路由是同一个路由，对应多个页面，注解使用如下，通过conditions匹配区分目标页：
-        @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"})
-        public class FixBuyDetailActivity{
-
-        }
-
-        @Route(path = "/deal/buy-detail",conditions = "{\"type\":\"shb\"}",group = DealGroup.class)
-        public class CoolBuyDetailActivity{
-
-        }
-
-##### 6>.如果多个路由，对应同一个页面：
-        @Route(path = {"/webView","/deal/baseWebView"})
-        public class BaseWebViewActivity{
-
-        }
-
-##### 7>.如果路由跳转，需要一些固定参数，可以有如下两种方式实现：
-        //方式一：
-        @Route(path = "/deal/buy-detail",group = DealGroup.class,interceptors = {"webViewInterceptor"},params = "{\"state\":\"1\"}")
-        public class FixBuyDetailActivity{
-
-        }
-        //方式二：
-        @Route(path = "/deal/buy-detail?state=1",conditions = "{\"type\":\"shb\"}",group = DealGroup.class)
-        public class CoolBuyDetailActivity{
-
-        }
-
-##### 8>.如果库的上下文管理类不能满足当前应用的跳转，我们可以实现子类，重写RouteContext，注解实现如下：
-         @Route(path = "/deal/buy-detail?state=1",conditions = "{\"type\":\"shb\"}",group = DealGroup.class,,injectContext = "buyRouteContext")
-         public class CoolBuyDetailActivity{
-
-         }
-
-         //RouteContext子类注解实现如下：
-         @InjectContext(name = "buyRouteContext")
-         public class BuyRouteContext extends RouteContext{
-            //可以重写动画实现，getIntent等方法
-         }
-         //如果注解需要一些配置项参数，可以如下实现：
-         @InjectContext(name = "buyRouteContext",options = "{\"url1\":\"/a/b\",\"url2\":\"/a/c\"}")
-         public class BuyRouteContext extends RouteContext{
-              //可以重写动画实现，getIntent等方法
-         }
-
-##### 9>.参数注解的使用，如果通过注解获取传递的参数，需要如下操作：
-        @Route(path = "/deal/buy-detail?state=1",conditions = "{\"type\":\"shb\"}",group = DealGroup.class,,injectContext = "buyRouteContext")
-        public class CoolBuyDetailActivity{
-            @Param
-            String type;
-            @Param(name = "productCode")//注解不定义name，默认和属性名相同，如果定义name，就通过重命名的name获取值
-            int code;
-
-            @Override
-            public void onCreate(Bundle savedInstanceState){
-                  super.onCreate(savedInstanceState);
-                  Router.getInstance().injectParams(this)
-            }
-
-        }
-
-#### (4),注解如果配置了配置文件或者以以上第(3)步注解形势定义完成，就可以直接调用路由API；所有API的调用，除了.build(),和.go()是必选之外，其他API的调用在两者之间，根据需要调用
-
-##### 1>.路由直接跳转，不需要任何配置API，如下：
+##### 1>.路由直接跳转，不需要任何配置API，登录如下：
         Router.getInstance().build("/login")//路由地址
                             .go(context);
 
@@ -279,45 +169,43 @@
                             .go(context);
 
 ##### 3>.跳转需要跳过注解或者配置文件中配置的某些拦截器：
-        //需要传递参数,跳过所有拦截器，例1:
+        //跳过所有拦截器，例1:
         Router.getInstance().build("/deal/buy-detail")
                                     .with(params)
                                     .skipInterceptors()
                                     .go(context);
-        //需要传递参数,跳过指定拦截器，例2:
+        //跳过指定拦截器，例2:
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
-                            .skipInterceptors("loginInterceptor")
+                            .skipInterceptors(LoginInterceptor.class)
                             .go(context);
-        //需要传递参数,跳过多个指定拦截器，例3:
+        //跳过多个指定拦截器，例3:
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
-                            .skipInterceptors("loginInterceptor","BindCardInterceptor")
-                            .go(context);
-        //不需要传递参数,跳过多个指定拦截器，例3:
-        Router.getInstance().build("/deal/buy-detail")
-                            .skipInterceptors("loginInterceptor","BindCardInterceptor")
+                            .skipInterceptors(LoginInterceptor.class,BindCardInterceptor.class)
                             .go(context);
 
 ##### 4>.跳转需要动态添加一些拦截器：
         //添加一个拦截器,例1：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
-                            .addInterceptors("loginInterceptor")
+                            .addInterceptors(LoginInterceptor.class,params,options,index)//params:在拦截器中传递给拦截操作的参数，可以是map，可以使json；options 拦截器需要的配置参数，可以是map，可以使json；index 插入拦截器的位置。后面三个参数都可以为空，默认是放在配置拦截器的最后
                             .go(context);
         //添加多个拦截器,例2：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
-                            .addInterceptors("loginInterceptor","BindCardInterceptor");
+                            .addInterceptors(LoginInterceptor.class,params,options,3);
+                            .addInterceptors(BindCardInterceptor.class,params,options)
                             .go(context);
 
-###### 注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有改API的调用，则后面无论添加多少个拦截器，都是无效的；如果调用的是.skipInterceptors("loginInterceptor")含参数的API，则只会移除指定的拦截器，如果后面有.addInterceptors("loginInterceptor")的调用，依然会执行。
+###### 注：关于添加和跳过拦截器API，需要注意.skipInterceptors()级别最高，如果一个跳转中有该API的调用，则后面无论添加多少个拦截器，都是无效的；如果调用的是.skipInterceptors(LoginInterceptor.class)含参数的API，则只会移除指定的拦截器，如果后面有.addInterceptors(LoginInterceptor.class)的调用，依然会执行。
 
 ##### 5>.跳转需要在当前页的ActivityForResult里面接收数据:
         //例1：
         Router.getInstance().build("/deal/buy-detail")
                             .with(params)
-                            .addInterceptors("loginInterceptor","BindCardInterceptor");
+                            .addInterceptors(LoginInterceptor.class,params,options,3);
+                            .addInterceptors(BindCardInterceptor.class,params,options)
                             .requestCode(100)
                             .go(context);
         //例2：
@@ -363,55 +251,133 @@
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             .requestCode(100)
                             .go(context);
-##### 10>.路由拦截回调的实例：
-        实例描述：从首页进入产品详情，中间需要登录拦截器，且用户没有登录
-        详情页注解描述：
-        @Route(path = "/product/detail" interceptors = {"loginInterceptor"})
-        public class ProductDetailActivity{
 
-        }
-        登录拦截器描述:
-        @Interceptor(name = "loginInterceptor")
+##### 10>.路由其他API调用：
+
+        I, 路由移交控制权，例如登录
+
+        在拦截器里面,使用路由跳转登录页：
         public class LoginInterceptor extends InterceptorImpl{
-              @Override
-              public void checkoutState(InterceptorStateCallBack stateCallBack){
-                   if(User.getInstance.isLogin()){
-                        stateCallBack.tateCallBack(SUCCESS)
-                   }else{
-                        stateCallBack.tateCallBack(FAIL)
-                   }
-              }
+                  @Override
+                  public void checkoutState(InterceptorStateCallBack stateCallBack){
+                       if(User.getInstance.isLogin()){
+                            stateCallBack.tateCallBack(SUCCESS)
+                       }else{
+                            stateCallBack.tateCallBack(FAIL)
+                       }
+                  }
 
-              @Override
-              public void onFailBefore(){
-                   //首次检查失败，在该方法进行登录验证，调用登录路由
-                   Router.getInstance().build("/login").go(context);
-              }
-        }
-
-        第一步：
-        Router.getInstance().build("/deal/buy-detail")
-                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                            .go(context);
-        第二步：
-        登录成功，在登录成功页面：
-        @Route(path = "/login")
+                  @Override
+                  public void onFailBefore(){
+                       //首次检查失败，在该方法进行登录验证，调用登录路由
+                       Router.getInstance().build("/login").go(context);
+                  }
+         }
+        在登录页面，登录成功，回调Router.getInstance().interceptorForSkipResult(InterceptorStateEnum state)
         public class LoginActivity{
+                @Override
+                public void onCreate(Bundle savedInstanceState){
+                      super.onCreate(savedInstanceState);
+                      login();
+                }
+
+                private void login(){
+                    ......
+                    //接口调用登录成功
+                    Router.getInstance().interceptorForSkipResult(SUCCESS)
+                }
+                //点击返回按钮和手机返回键调用方法
+                private void close(){
+                    打断条件下：
+                    Router.getInstance().interceptorForSkipResult(DEFAULT)
+                    或者
+                    Router.getInstance().interceptorForSkipResult()/可以不传，默认是DEFAULT
+                }
+         }
+
+        II, 设置指定路由错误处理：
+
+        Router.getInstance().build("/deal/buy-detail")
+                            .with("type","shb")
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            .errorHandler(iErrorHandler)//实现IErrorHandler接口，进行错误设置
+                            .requestCode(100)
+                            .go(context);
+
+        III, 如果通过路由进入某一个页面，可以通过API,getCurrentUri获取当前面的路由url，例如：
+        通过路由从详情页进入爽活宝购买页，在购买页获取进入爽活宝购买页的url：
+
+        String url = Router.getInstance().getCurrentUri();//url的格式例如：jhjrapp://deal/buy/detail?type=shb&code=123
+
+        IV, 通过路由进入某页面，中间逻辑通过原生跳转处理，在最终页面，可以通过goBack回到路由进入页面的上一个页面，如果上一页为空，就回到进入页面，例如：
+        从详情页进入购买页，中间需要拦截器，通过路由进入绑卡页面，在绑卡页面通过通过原生进入密码设置页，结果页，最后在结果页，调用：
+
+        Router.getInstance().goBack(context);回到详情页，继续进行进入购买页的拦截器判断
+
+        V, 如果需要通过非默认配置文件添加或者更改路由，只需要调用如下API，把更改的部分合并到默认路由配置中：
+
+        Router.getInstance().mergeConfig(configJsonString);
+
+### 3，拦截器,匹配类的具体实现
+
+##### 1>.拦截器的具体实现，例如登录：
+      public class LoginInterceptor extends InterceptorImpl{
+             @Override
+             public void checkoutState(InterceptorStateCallBack stateCallBack){
+                    //是否登录判断验证,在这里，其他拦截器也可以通过异步获取数据验证，再回调
+                    if(User.getInstance.isLogin()){
+                         stateCallBack.tateCallBack(SUCCESS)
+                    }else{
+                        stateCallBack.tateCallBack(FAIL)
+                    }
+             }
+
+             @Override
+             public void onFailBefore(){
+                  //首次检查失败，在该方法进行登录验证，调用登录路由
+                  Router.getInstance().build("/login").go(context);
+             }
+      }
+      //上面两个是必须实现的方法，还有其他打断，onBreak(),验证成功等的方法也可以重写，
+
+##### 2>.跳转匹配类的实现，例如，匹配目标是activity跳转类
+        public class ActivityMatcher implements IMatcherTarget {
+            private static final String TAG = "ActivityMatcher";
+
+            private Context context;
+            private RouteContext routeContext;
+            private RouteRequest routeRequest;
+
             @Override
-            public void onCreate(Bundle savedInstanceState){
-                  super.onCreate(savedInstanceState);
-                  login();
+            public void matcher(RouteContext routeContext) {
+                this.context = routeContext.getContext();
+                this.routeContext = routeContext;
+                this.routeRequest = routeContext.getRouteRequest();
+                if (context instanceof Activity) {
+                    Intent intent = assembleFlagsIntent();
+                    if (intent == null) {
+                        return;
+                    }
+                    if (routeRequest.getRequestCode() > 0) {
+                        ActivityCompat.startActivityForResult((Activity) context, intent, routeRequest.getRequestCode(), null);
+                    } else {
+                        ActivityCompat.startActivity((Activity) context, intent, null);
+                    }
+                    assembleAnim();
+                }
+            }
+        }
+##### 3>.默认错误接口实现
+        public class IErrorHandlerImpl implements IErrorHandler{
+            @Override
+            public void onClientError(Context context, RouteResponse response){
+
             }
 
-            private void login(){
-                ......
-                //接口调用登录成功
-                Router.getInstance().interceptorForSkipResult(false)
-            }
-            //点击返回按钮和手机返回键调用方法
-            private void close(){
-                Router.getInstance().interceptorForSkipResult(true)
+            @Override
+            public void onServerError(Context context, RouteResponse response){
+
             }
         }
 
-###### 注：其他组合不在这里举例一一说明，大家可以自己进行验证和体验。
+###### 注：各种API的组合，及具体效果，大家可以自己进行验证和体验。
