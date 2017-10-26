@@ -1,13 +1,11 @@
-package com.jinhui365.router.route;
+package com.jinhui365.router.core;
 
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.AnimRes;
 import android.util.Log;
 
-import com.jinhui365.router.data.RouteVO;
-import com.jinhui365.router.interceptor.InterceptorImpl;
-import com.jinhui365.router.utils.GsonUtils;
+import com.jinhui365.router.utils.JsonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +74,7 @@ public class RouteContextBuilder {
     }
 
     public RouteContextBuilder withParams(String json) {
-        Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
+        Map<String, Object> map = JsonUtil.jsonToMap(json, String.class, Object.class);
         withParams(map);
         return this;
     }
@@ -108,7 +106,7 @@ public class RouteContextBuilder {
      * @param interceptors
      * @return
      */
-    public RouteContextBuilder skipInterceptors(Class<InterceptorImpl>... interceptors) {
+    public RouteContextBuilder skipInterceptors(Class<AbsInterceptor>... interceptors) {
         mRouteRequest.removeInterceptors(interceptors);
         return this;
     }
@@ -121,24 +119,24 @@ public class RouteContextBuilder {
      * @param options
      * @return
      */
-    public RouteContextBuilder addInterceptor(Class<InterceptorImpl> clazz, Map<String, Object> params, Map<String, Object> options) {
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options) {
         addInterceptor(clazz, params, options, -1);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<InterceptorImpl> clazz, String paramsJson, String optionsJson) {
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String paramsJson, String optionsJson) {
         addInterceptor(clazz, paramsJson, optionsJson, -1);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<InterceptorImpl> clazz, String paramsJson, String optionsJson, int index) {
-        Map<String, Object> params = GsonUtils.jsonToMap(paramsJson, String.class, Object.class);
-        Map<String, Object> options = GsonUtils.jsonToMap(optionsJson, String.class, Object.class);
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String paramsJson, String optionsJson, int index) {
+        Map<String, Object> params = JsonUtil.jsonToMap(paramsJson, String.class, Object.class);
+        Map<String, Object> options = JsonUtil.jsonToMap(optionsJson, String.class, Object.class);
         addInterceptor(clazz, params, options, index);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<InterceptorImpl> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
         mRouteRequest.addInterceptors(clazz, params, options, index);
         return this;
     }
@@ -161,7 +159,7 @@ public class RouteContextBuilder {
 //            callback(RouteResult.FAILED, "uri == null.");
 //        }
 //
-//        RouteVO resultVO = RouteManager.getInstance().getResultVOByRoutePath(mRouteRequest.getUri().getPath());
+//        RouteVO resultVO = ConfigManager.getInstance().getResultVOByRoutePath(mRouteRequest.getUri().getPath());
 //        if (null == resultVO) {
 //            callback(RouteResult.FAILED, "resultVO == null.");
 //        }

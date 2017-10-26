@@ -1,4 +1,4 @@
-package com.jinhui365.router.matcher;
+package com.jinhui365.router.task;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,29 +7,28 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.jinhui365.router.core.IRouteTask;
 import com.jinhui365.router.route.RouteContext;
-import com.jinhui365.router.route.RouteRequest;
+import com.jinhui365.router.core.RouteRequest;
 import com.jinhui365.router.utils.Util;
 
-import java.util.Map;
-
 /**
- * Name:ActivityMatcher
+ * Name:ActivityTask
  * Author:jmtian
  * Commemt:Activity匹配类
  * Date: 2017/10/19 15:56
  */
 
 
-public class ActivityMatcher implements IMatcherTarget {
-    private static final String TAG = "ActivityMatcher";
+public class ActivityTask implements IRouteTask {
+    private static final String TAG = "ActivityTask";
 
     private Context context;
     private RouteContext routeContext;
     private RouteRequest routeRequest;
 
     @Override
-    public void matcher(RouteContext routeContext) {
+    public void execute(RouteContext routeContext) {
         this.context = routeContext.getContext();
         this.routeContext = routeContext;
         this.routeRequest = routeContext.getRouteRequest();

@@ -1,4 +1,4 @@
-package com.jinhui365.router.data;
+package com.jinhui365.router.core;
 
 import android.util.Log;
 
@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Name:RouteItemVO
+ * Name:RouteOptionVO
  * Author:jmtian
  * Commemt:每个目标类对应的VO
  * Date: 2017/8/24 9:51
  */
 
 
-public class RouteItemVO implements Serializable {
-    private static final String TAG = "RouteItemVO";
+public class RouteOptionVO implements Serializable {
+    private static final String TAG = "RouteOptionVO";
+
     private String clazz;//类名
-    private Map<String, Object> params;//传入当前类的参数
     private Map<String, Object> options;//在当前类使用的配置项
 
     public String getClazz() {
@@ -36,17 +36,6 @@ public class RouteItemVO implements Serializable {
 
     public void setClazz(String clazz) {
         this.clazz = clazz;
-    }
-
-    public Map<String, Object> getParams() {
-        if (null == params) {
-            params = new HashMap<>();
-        }
-        return params;
-    }
-
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
     }
 
     public Map<String, Object> getOptions() {

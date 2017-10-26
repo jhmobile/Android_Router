@@ -15,25 +15,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Name:GsonUtils
+ * Name:JsonUtil
  * Author:jmtian
  * Commemt:gson工具类
  * Date: 2017/8/23 14:31
  */
 
 
-public class GsonUtils {
+public class JsonUtil {
     private static Gson gson = null;
 
-    private GsonUtils() {
+    private JsonUtil() {
     }
 
     static {
         if (null == gson) {
             gson = (new GsonBuilder())
                     .registerTypeHierarchyAdapter(Integer.class, new JsonIntAdapter())
-                    .registerTypeHierarchyAdapter(Integer.TYPE, new GsonUtils.JsonIntAdapter())
-                    .registerTypeHierarchyAdapter(Long.class, new GsonUtils.JsonLongAdapter())
+                    .registerTypeHierarchyAdapter(Integer.TYPE, new JsonUtil.JsonIntAdapter())
+                    .registerTypeHierarchyAdapter(Long.class, new JsonUtil.JsonLongAdapter())
                     .registerTypeHierarchyAdapter(Long.TYPE, new JsonLongAdapter())
                     .registerTypeHierarchyAdapter(Double.class, new JsonDoubleAdapter())
                     .registerTypeHierarchyAdapter(Double.TYPE, new JsonDoubleAdapter())

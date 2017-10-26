@@ -11,126 +11,59 @@
 7.动画配置
 
 ## 二，配置文件格式
-### 注：格式简化版</p>
-    第一层路由：{</p>
-        拦截器数组：</p>
-        子路由：</p>
-        目标匹配：</p>
-        目标对象：</p>
-    }
 
+### 1.配置文件格式事例：
 <pre><code>
     {
-        "deal": {//每一层路由
-            "interceptors": [//每一层下面对应的拦截器数组
-              {
-                "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",//拦截器类
-                "params": {},//拦截器需要传递的参数
-                "options": {}//拦截器需要的配置项
-              },
-              {
-                "clazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
-                "params": {},
-                "options": {}
-              }
+        "deal": {//路由
+            "interceptors": [//路由对应拦截器数组
+              "com.rxhui.pay.application.gotopage.LoginInterceptor",
+              "com.rxhui.pay.application.gotopage.BindCardInterceptor"
             ],
-            "subRoutes": {//每一层下面的子路由
-              "buy": {
+            "subRoutes": {//子路由对象
+              "buy": {//路由
                 "interceptors": [
-                  {
-                    "clazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                    "params": {},
-                    "options": {}
-                  }
+                  "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor"
                 ],
-                "matcher":{//当前路由层及下面各层需要的跳转目标匹配类
-                    "clazz":"com.rxhui.pay.application.gotopage.ActivityMatcher",//匹配类
-                    "options":{//匹配配置参数
-                        "detailVO:""
-                    }
-                }
+                "taskClass":"com.rxhui.pay.application.gotopage.ActivityTask",//路由目标执行类
                 "subRoutes": {
                   "detail?type=spirit&rateType=unfix": {
-                    "target": {//该层的目标信息，不同的跳转方式，匹配不同的参数
+                    "taskOptions": {//目标执行类配置信息
                       "clazz": "com.rxhui.pay.business.deal.buy.BuyCurrentActivity",
                       "arriveType": "spirit",
                       "index:": "1"
                     }
                   },
                   "detail?type=opencashNew": {
-                    "target": {
+                    "taskOptions": {
                       "clazz": "com.rxhui.pay.business.deal.buy.BuyCoolCurrentActivity",
                       "arriveType": "opencashNew"
                     }
                   },
                   "detail": {
                     "interceptors": [
-                      {
-                        "clazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
-                        "params": {
-                          "state": "-1"
-                        },
-                        "options": {
-                          "url1": "/user/qualified",
-                          "url2": "/user/unqualified"
-                        }
-                      }
+                      "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor"
                     ],
-                    "target": {
-                      "clazz": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
-                    }
+                    "taskOptions": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
                   }
                 }
               },
-              "withdraw": {
-                "target": {
-                  "clazz": "com.rxhui.pay.business.deal.withdraw.WithdrawCurrentActivity"
-                }
-              }
+              "withdraw": "com.rxhui.pay.business.deal.withdraw.WithdrawCurrentActivity"
             }
           },
-          "login": {
-            "target": {
-              "clazz": "com.rxhui.pay.business.auth.UserLoginActivity"
-            }
-          },
-          "deal/buy/detail":{
-
-              "interceptors": [
-                {
-                  "clazz": "com.rxhui.pay.application.gotopage.LoginInterceptor",
-                  "params": {},
-                  "options": {}
-                },
-                {
-                  "clazz": "com.rxhui.pay.application.gotopage.BindCardInterceptor",
-                  "params": {},
-                  "options": {}
-                },
-                {
-                  "clazz": "com.rxhui.pay.application.gotopage.buy.ProductRiskInterceptor",
-                  "params": {},
-                  "options": {}
-                },
-                {
-                  "clazz": "com.rxhui.pay.application.gotopage.buy.InvestorWebViewInterceptor",
-                  "params": {
-                    "state": "-1"
-                  },
-                  "options": {
-                    "url1": "/user/qualified",
-                    "url2": "/user/unqualified"
-                  }
-                }
-              ],
-              "target": {
-                "clazz": "com.rxhui.pay.business.deal.buy.BuyFixedActivity"
-              }
-            }
+          "login": "com.rxhui.pay.business.auth.UserLoginActivity",
     }
 </code></pre>
-    配置文件的匹配方式：
-    默认找最全的路径匹配，如果匹配不到，就以组形势一级一级向下找，把每一级下面的信息都递归放入下面的对象中，组成最终目标需要的数据信息
+### 2.配置文件key字段解释表
+#### 1>.Router：
+|:属性名:|:是否可选:|:类型:|:默认属性:|
+|:subRoutes:|:是:|:object:|:空:|
+|:interceptors:|:是:|:Array:|:class:|
+|:taskClass:|:是:|:String:|:class:|
+|:taskOptions:|:否:|:Object:|:class:|
+#### 2>.interceptors：
+
+
 
 ## 三，API使用
 

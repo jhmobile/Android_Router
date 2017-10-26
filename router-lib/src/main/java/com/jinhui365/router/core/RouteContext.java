@@ -1,16 +1,13 @@
-package com.jinhui365.router.route;
+package com.jinhui365.router.core;
 
 import android.app.Activity;
 import android.content.Context;
-
-import com.jinhui365.router.interceptor.InterceptorImpl;
-import com.jinhui365.router.interceptor.InterceptorStateEnum;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.jinhui365.router.interceptor.InterceptorStateEnum.DEFAULT;
+import static com.jinhui365.router.core.InterceptorState.DEFAULT;
 
 /**
  * Author:jmtian
@@ -29,7 +26,7 @@ public class RouteContext {
 
     private Context context;
     private RouteRequest routeRequest;
-    private List<InterceptorImpl> interceptors;//Interceptor集合
+    private List<AbsInterceptor> interceptors;//Interceptor集合
     private Map<String, Object> params;//跳转需要的参数
     private Map<String, Object> options;//baseContext子类需要的配置项参数
     private RouteContext parent;
@@ -55,7 +52,7 @@ public class RouteContext {
         this.routeRequest = routeRequest;
     }
 
-    public void setInterceptors(List<InterceptorImpl> interceptors) {
+    public void setInterceptors(List<AbsInterceptor> interceptors) {
         this.interceptors = interceptors;
     }
 
@@ -114,7 +111,7 @@ public class RouteContext {
      *
      * @return
      */
-    public List<InterceptorImpl> getInterceptors() {
+    public List<AbsInterceptor> getInterceptors() {
         return interceptors;
     }
 
@@ -149,7 +146,7 @@ public class RouteContext {
      *
      * @return
      */
-    public InterceptorImpl getCurrentInterceptor() {
+    public AbsInterceptor getCurrentInterceptor() {
         if (-1 == currentInterceptorIndex || currentInterceptorIndex >= interceptors.size()) {
             return null;
         }
@@ -161,7 +158,7 @@ public class RouteContext {
      */
     public void next() {
         if (hasUnVerifyInterceptor()) {
-            InterceptorImpl nextInterceptor = interceptors.get(++currentInterceptorIndex);
+            AbsInterceptor nextInterceptor = interceptors.get(++currentInterceptorIndex);
             nextInterceptor.onStart();
         } else {
             gotoTarget();
@@ -174,8 +171,8 @@ public class RouteContext {
      * @param state 回调状态
      * @param map   回调参数
      */
-    public void skipResultCallBack(InterceptorStateEnum state, Map<String, Object> map) {
-        InterceptorImpl currentInterceptor = getCurrentInterceptor();
+    public void skipResultCallBack(InterceptorState state, Map<String, Object> map) {
+        AbsInterceptor currentInterceptor = getCurrentInterceptor();
         if (currentInterceptor != null) {
             if (null != map && !map.isEmpty()) {
                 currentInterceptor.getParams().putAll(map);

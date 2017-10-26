@@ -1,15 +1,10 @@
-package com.jinhui365.router.route;
+package com.jinhui365.router.core;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
-import com.jinhui365.router.data.RouteItemVO;
-import com.jinhui365.router.data.RouteVO;
-import com.jinhui365.router.interceptor.InterceptorImpl;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,27 +12,27 @@ import java.util.Map;
 /**
  * Name:RouteRequest
  * Author:jmtian
- * Commemt:Route request object.
+ * Commemt:RouteContext request object.
  * Date: 2017/10/16 14:39
  */
 
 public class RouteRequest implements Serializable {
     private static final int INVALID_REQUEST_CODE = -1;
 
-    private Uri uri;
+    private Uri url;
 
     private Map<String,Object> target;
     private Map<String, Object> params;
     private Map<String, Object> options;
     private int flags;
-    private List<InterceptorImpl> interceptors;
+    private List<AbsInterceptor> interceptors;
     // skip all the interceptors
     private boolean skipInterceptors;
     // skip some interceptors temporarily
-    private List<RouteItemVO> removedInterceptors;
+    private List<RouteOptionVO> removedInterceptors;
     // add some interceptors temporarily
     @Nullable
-    private List<RouteItemVO> addedInterceptors;
+    private List<RouteOptionVO> addedInterceptors;
     @Nullable
     private RouteCallback callback;
     private IErrorHandler handler;
@@ -100,11 +95,11 @@ public class RouteRequest implements Serializable {
         this.flags |= flags;
     }
 
-    public List<InterceptorImpl> getInterceptors() {
+    public List<AbsInterceptor> getInterceptors() {
         return interceptors;
     }
 
-    public void setInterceptors(List<InterceptorImpl> interceptors) {
+    public void setInterceptors(List<AbsInterceptor> interceptors) {
         this.interceptors = interceptors;
     }
 
@@ -117,27 +112,27 @@ public class RouteRequest implements Serializable {
     }
 
     @Nullable
-    public List<RouteItemVO> getAddedInterceptors() {
+    public List<RouteOptionVO> getAddedInterceptors() {
         return addedInterceptors;
     }
 
     @Nullable
-    public List<RouteItemVO> getRemovedInterceptors() {
+    public List<RouteOptionVO> getRemovedInterceptors() {
         return removedInterceptors;
     }
 
-    public void addInterceptors(Class<InterceptorImpl> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
+    public void addInterceptors(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
         if (this.addedInterceptors == null) {
             this.addedInterceptors = new ArrayList<>();
         }
-        this.addedInterceptors.add(new RouteItemVO());
+        this.addedInterceptors.add(new RouteOptionVO());
     }
 
-    public void removeInterceptors(Class<InterceptorImpl>... interceptors) {
+    public void removeInterceptors(Class<AbsInterceptor>... interceptors) {
         if (this.removedInterceptors == null) {
             this.removedInterceptors = new ArrayList<>();
         }
-        this.removedInterceptors.add(new RouteItemVO());
+        this.removedInterceptors.add(new RouteOptionVO());
     }
 
     @Nullable

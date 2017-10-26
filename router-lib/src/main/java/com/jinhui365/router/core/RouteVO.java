@@ -1,4 +1,4 @@
-package com.jinhui365.router.data;
+package com.jinhui365.router.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,19 +15,19 @@ import java.util.Map;
 public class RouteVO {
     private static final String TAG = "RouteVO";
 
-    private List<RouteItemVO> interceptors;
+    private List<RouteOptionVO> interceptors;
     private Map<String, RouteVO> subRoutes;
-    private RouteItemVO matcher;//跳转匹配类
-    private Map<String, String> target;//路由目标
+    private String taskClass;//跳转匹配类
+    private Map<String, Object> taskOptions;//路由目标
 
-    public List<RouteItemVO> getInterceptors() {
+    public List<RouteOptionVO> getInterceptors() {
         if (null == interceptors || interceptors.isEmpty()) {
             interceptors = new ArrayList<>();
         }
         return interceptors;
     }
 
-    public void setInterceptors(List<RouteItemVO> interceptors) {
+    public void setInterceptors(List<RouteOptionVO> interceptors) {
         this.interceptors = interceptors;
     }
 
@@ -39,19 +39,4 @@ public class RouteVO {
         this.subRoutes = subRoutes;
     }
 
-    public RouteItemVO getMatcher() {
-        return matcher;
-    }
-
-    public void setMatcher(RouteItemVO matcher) {
-        this.matcher = matcher;
-    }
-
-    public Map<String, String> getTarget() {
-        return target;
-    }
-
-    public void setTarget(Map<String, String> target) {
-        this.target = target;
-    }
 }

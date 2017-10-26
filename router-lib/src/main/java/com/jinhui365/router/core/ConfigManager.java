@@ -1,13 +1,7 @@
-package com.jinhui365.router.route;
+package com.jinhui365.router.core;
 
-import com.jinhui365.router.data.RouteItemVO;
-import com.jinhui365.router.data.RouteVO;
-import com.jinhui365.router.interceptor.InterceptorImpl;
-import com.jinhui365.router.matcher.ActivityMatcher;
-import com.jinhui365.router.utils.GsonUtils;
+import com.jinhui365.router.utils.JsonUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,17 +11,17 @@ import java.util.Map;
  * Commemt:Route数据初始化类
  * Date: 2017/7/24 14:53
  */
-public class RouteManager {
-    private static final String TAG = "RouteManager";
+public class ConfigManager {
+    private static final String TAG = "ConfigManager";
 
     private Map<String, RouteVO> configRouteMap;
 
-    private static final RouteManager instance = new RouteManager();
+    private static final com.jinhui365.router.route.ConfigManager instance = new com.jinhui365.router.route.ConfigManager();
 
-    private RouteManager() {
+    private ConfigManager() {
     }
 
-    public static RouteManager getInstance() {
+    public static com.jinhui365.router.route.ConfigManager getInstance() {
         return instance;
     }
 
@@ -38,12 +32,13 @@ public class RouteManager {
      */
     public void init(String pageJsonString) {
         //初始化默认配置文件
-        configRouteMap = GsonUtils.jsonToMap(pageJsonString, String.class, RouteVO.class);
+        configRouteMap = JsonUtil.jsonToMap(pageJsonString, String.class, RouteVO.class);
+
     }
 
     //合并传递过来的部分配置文件
     public void mergeConfig(String jsonString) {
-        Map<String, RouteVO> newMap = GsonUtils.jsonToMap(jsonString, String.class, RouteVO.class);
+        Map<String, RouteVO> newMap = JsonUtil.jsonToMap(jsonString, String.class, RouteVO.class);
         configRouteMap.putAll(newMap);
     }
 
@@ -77,7 +72,7 @@ public class RouteManager {
      * @param params
      * @return
      */
-    private RouteVO getResultVOByCondition(List<RouteItemVO> list, Map<String, String> params) {
+    private RouteVO getResultVOByCondition(List<RouteOptionVO> list, Map<String, String> params) {
         RouteVO resultVO = null;
 
         return resultVO;
@@ -89,14 +84,14 @@ public class RouteManager {
      * @param index
      * @return
      */
-    public InterceptorImpl getInterceptorByIndex(RouteContext context, int index) {
+    public AbsInterceptor getInterceptorByIndex(RouteContext context, int index) {
 //        if (null == interceptors || interceptors.isEmpty()) {
 //            return null;
 //        }
 //        if (index < interceptors.size()) {
 //            InterceptorVO interceptorVO = interceptors.get(index);
 //            try {
-//                InterceptorImpl vo = interceptorVO.getInterceptorClazz()
+//                AbsInterceptor vo = interceptorVO.getInterceptorClazz()
 //                        .getConstructor(RouteContext.class, Map.class, Map.class)
 //                        .newInstance(context, interceptorVO.getParams(), interceptorVO.getOptions());
 //                return vo;
@@ -113,8 +108,8 @@ public class RouteManager {
      * @param routeContext
      * @return
      */
-    public List<InterceptorImpl> getInterceptors(RouteContext routeContext) {
-//        List<InterceptorImpl> list = new ArrayList<>();
+    public List<AbsInterceptor> getInterceptors(RouteContext routeContext) {
+//        List<AbsInterceptor> list = new ArrayList<>();
 //        if (null == interceptors || interceptors.isEmpty()) {
 //            return list;
 //        }

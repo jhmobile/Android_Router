@@ -1,21 +1,17 @@
-package com.jinhui365.router.route;
+package com.jinhui365.router.core;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.jinhui365.router.interceptor.InterceptorStateEnum;
-import com.jinhui365.router.matcher.IMatcherTarget;
-import com.jinhui365.router.utils.GsonUtils;
+import com.jinhui365.router.utils.JsonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jinhui365.router.interceptor.InterceptorStateEnum.DEFAULT;
-
 
 /**
- * Name:Router
+ * Name:RouteManager
  * Author:jmtian
  * Commemt:路由跳转总管类：
  * 管理路由库的数据初始化，
@@ -24,15 +20,15 @@ import static com.jinhui365.router.interceptor.InterceptorStateEnum.DEFAULT;
  * Date: 2017/8/16 11:24
  */
 
-public class Router {
-    private static final String TAG = "Router";
+public class RouteManager {
+    private static final String TAG = "RouteManager";
     public static final String RAW_URI = "raw_uri";
 
     private RouteContext currentContext;
 
     private IErrorHandler handler;
 
-    private IMatcherTarget iTarget;
+    private IRouteTask iTarget;
 
     public RouteContext getCurrentContext() {
         return currentContext;
@@ -49,12 +45,12 @@ public class Router {
         this.handler = handler;
     }
 
-    private static final Router instance = new Router();
+    private static final RouteManager instance = new com.jinhui365.router.route.RouteManager();
 
-    private Router() {
+    private RouteManager() {
     }
 
-    public static Router getInstance() {
+    public static RouteManager getInstance() {
         return instance;
     }
 
@@ -63,10 +59,10 @@ public class Router {
      *
      * @param configJsonString
      */
-    public void initialize(String configJsonString, IErrorHandler handler,IMatcherTarget iTarget) {
+    public void initialize(String configJsonString, IRouteCallBack callBack,IRouteTask iTarget) {
         this.handler = handler;
         this.iTarget = iTarget;
-        RouteManager.getInstance().init(configJsonString);
+        ConfigManager.getInstance().init(configJsonString);
     }
 
     /**
@@ -101,27 +97,27 @@ public class Router {
     /**
      * 拦截器执行完毕，回调路由库
      */
-    public void interceptorForSkipResult() {
-        interceptorForSkipResult(DEFAULT, "");
+    public void interceptorBreak() {
+
     }
 
-    public void interceptorForSkipResult(InterceptorStateEnum state) {
+    public void interceptorForSkipResult(InterceptorState state) {
         interceptorForSkipResult(state, "");
     }
 
 
-    public void interceptorForSkipResult(InterceptorStateEnum state, String json) {
-        Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
+    public void interceptorForSkipResult(InterceptorState state, String json) {
+        Map<String, Object> map = JsonUtil.jsonToMap(json, String.class, Object.class);
         interceptorForSkipResult(state, map);
     }
 
-    public void interceptorForSkipResult(InterceptorStateEnum state, String key, Object value) {
+    public void interceptorForSkipResult(InterceptorState state, String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
         interceptorForSkipResult(state, map);
     }
 
-    public void interceptorForSkipResult(InterceptorStateEnum state, Map<String, Object> map) {
+    public void interceptorForSkipResult(InterceptorState state, Map<String, Object> map) {
         if (null == currentContext || null == currentContext.getParent()) {
             return;
         }
@@ -139,7 +135,7 @@ public class Router {
     }
 
     public void goBack(Context context, String json) {
-        Map<String, Object> map = GsonUtils.jsonToMap(json, String.class, Object.class);
+        Map<String, Object> map = JsonUtil.jsonToMap(json, String.class, Object.class);
         goBack(context, map);
     }
 
