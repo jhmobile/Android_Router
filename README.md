@@ -56,11 +56,11 @@
 </code></pre>
 ### 2.配置文件key字段解释表
 #### 1>.Router：
-|:属性名:|:是否可选:|:类型:|:默认属性:|
-|:subRoutes:|:是:|:object:|:空:|
-|:interceptors:|:是:|:Array:|:class:|
-|:taskClass:|:是:|:String:|:class:|
-|:taskOptions:|:否:|:Object:|:class:|
+|属性名|是否可选|类型|默认属性|
+|subRoutes|是|object|空|
+|interceptors|是|Array|class|
+|taskClass|是|String|class|
+|taskOptions|否|Object|class|
 #### 2>.interceptors：
 
 
