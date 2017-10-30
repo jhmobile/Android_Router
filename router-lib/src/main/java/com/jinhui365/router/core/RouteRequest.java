@@ -34,8 +34,8 @@ public class RouteRequest implements Serializable {
     @Nullable
     private List<RouteOptionVO> addedInterceptors;
     @Nullable
-    private RouteCallback callback;
-    private IErrorHandler handler;
+    private IRouteCallBack callback;
+
     private int requestCode = INVALID_REQUEST_CODE;
     private int enterAnim;
     private int exitAnim;
@@ -49,16 +49,16 @@ public class RouteRequest implements Serializable {
         this.target = target;
     }
 
-    public RouteRequest(Uri uri) {
-        this.uri = uri;
+    public RouteRequest(Uri url) {
+        this.url = url;
     }
 
     public Uri getUri() {
-        return uri;
+        return url;
     }
 
-    public void setUri(Uri uri) {
-        this.uri = uri;
+    public void setUri(Uri url) {
+        this.url = url;
     }
 
     public Map<String, Object> getParams() {
@@ -136,20 +136,12 @@ public class RouteRequest implements Serializable {
     }
 
     @Nullable
-    public RouteCallback getCallback() {
+    public IRouteCallBack getCallback() {
         return callback;
     }
 
-    public void setCallback(@Nullable RouteCallback callback) {
+    public void setCallback(@Nullable IRouteCallBack callback) {
         this.callback = callback;
-    }
-
-    public IErrorHandler getHandler() {
-        return handler;
-    }
-
-    public void setHandler(IErrorHandler handler) {
-        this.handler = handler;
     }
 
     public int getRequestCode() {

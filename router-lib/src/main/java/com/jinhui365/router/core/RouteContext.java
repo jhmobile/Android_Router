@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.jinhui365.router.core.InterceptorState.DEFAULT;
+import static com.jinhui365.router.core.InterceptorLifeCycle.DEFAULT;
 
 /**
  * Author:jmtian
@@ -159,7 +159,7 @@ public class RouteContext {
     public void next() {
         if (hasUnVerifyInterceptor()) {
             AbsInterceptor nextInterceptor = interceptors.get(++currentInterceptorIndex);
-            nextInterceptor.onStart();
+            nextInterceptor.onIntercept();
         } else {
             gotoTarget();
         }
@@ -175,13 +175,13 @@ public class RouteContext {
         AbsInterceptor currentInterceptor = getCurrentInterceptor();
         if (currentInterceptor != null) {
             if (null != map && !map.isEmpty()) {
-                currentInterceptor.getParams().putAll(map);
+                currentInterceptor.getOptions().putAll(map);
             }
             // 回调是默认状态，则代表打断
             if (DEFAULT.equals(state)) {
                 currentInterceptor.onBreak();
             } else {
-                currentInterceptor.onAfter();
+                currentInterceptor.onComplete();
             }
         }
     }
@@ -192,7 +192,7 @@ public class RouteContext {
      * 如果需要可以直接跳转
      */
     private void gotoTarget() {
-        Router.getInstance().setCurrentContext(parent);
+        RouteManager.getInstance().setCurrentContext(parent);
 //        callback(RouteState.SUCCEED, null);
 
     }

@@ -1,8 +1,10 @@
 package com.jinhui365.router.core;
 
-import com.jinhui365.router.route.RouteContext;
-
 import java.util.Map;
+
+import static com.jinhui365.router.core.InterceptorState.PENDING;
+import static com.jinhui365.router.core.InterceptorState.UNVERIFIED;
+import static com.jinhui365.router.core.InterceptorState.VERIFIED;
 
 /**
  * Author:jmtian
@@ -18,19 +20,11 @@ import java.util.Map;
 public abstract class AbsInterceptor implements IInterceptCallBack {
 
     protected RouteContext routeContext;
-    protected Map<String, Object> options;//condition需要的配置项
+    protected Map<String, Object> options;//Interceptor需要的配置项
 
 
-    private InterceptorState state = InterceptorState.STATE_DEFAULT;//Interceptor验证结果
+    private InterceptorState state;//Interceptor验证结果
     private InterceptorLifeCycle lifeState = InterceptorLifeCycle.DEFAULT;//Interceptor验证最后走的生命周期方法
-
-    public Map<String, Object> getParams() {
-        return params;
-    }
-
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
-    }
 
     public Map<String, Object> getOptions() {
         return options;
@@ -57,9 +51,8 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
     }
 
 
-    public AbsInterceptor(RouteContext routeContext, Map<String, Object> params, Map<String, Object> options) {
+    public AbsInterceptor(RouteContext routeContext, Map<String, Object> options) {
         this.routeContext = routeContext;
-        this.params = params;
         this.options = options;
     }
 
@@ -69,8 +62,8 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
      * description: 初始验证
      */
     public void onIntercept() {
-        lifeState = InterceptorLifeCycle.START;
-        checkoutState(this);
+        lifeState = InterceptorLifeCycle.INTERCEPT;
+        verify(this);
     }
 
     /**
@@ -79,8 +72,8 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
      * description: 验证完成回调
      */
     public void onComplete() {
-        lifeState = InterceptorLifeCycle.AFTER;
-        checkoutState(this);
+        lifeState = InterceptorLifeCycle.COMPLETE;
+        verify(this);
     }
 
     /**
@@ -88,9 +81,9 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
      * Date: 2017/8/24 12:58
      * description: 验证打断
      */
-    public void onBreak() {
-        lifeState = InterceptorLifeCycle.BREAK;
-        onEndBreak();
+    public void onInterrupt() {
+        lifeState = InterceptorLifeCycle.INTERRUPT;
+        interrupt();
     }
 
     /**
@@ -99,12 +92,12 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
      * 1 失败
      * 2 pending
      */
-    protected abstract void verifiy(IInterceptCallBack stateCallBack);
+    protected abstract void verify(IInterceptCallBack stateCallBack);
 
     /**
      * start checkout success
      */
-    protected void interceptOnVerifyPass (){
+    protected void interceptOnVerifyPass() {
         routeContext.next();
     }
 
@@ -129,40 +122,40 @@ public abstract class AbsInterceptor implements IInterceptCallBack {
     /**
      * after checkout pending
      */
-    protected void onPendingAfter() {
+    protected void completeOnVerifying() {
     }
 
     /**
      * after checkout fail
      */
-    protected void onFailAfter() {
+    protected void completeOnVerifyNotPass() {
 
     }
 
     /**
      * break
      */
-    protected void onEndBreak() {
+    protected void interrupt() {
 
     }
 
     @Override
     public void stateCallBack(InterceptorState state) {
         this.state = state;//记录验证状态
-        if (state.equals(STATE_SUCCESS) && lifeState.equals(InterceptorLifeCycle.START)) {
-            onSuccessBefore();
-        } else if (state.equals(STATE_SUCCESS) && lifeState.equals(InterceptorLifeCycle.AFTER)) {
-            onSuccessAfter();
-        } else if (state.equals(STATE_FAIL) && lifeState.equals(InterceptorLifeCycle.START)) {
-            onFailBefore();
-        } else if (state.equals(STATE_FAIL) && lifeState.equals(InterceptorLifeCycle.AFTER)) {
-            onFailAfter();
-        } else if (state.equals(STATE_PENDING) && lifeState.equals(InterceptorLifeCycle.START)) {
-            onPendingBefore();
-        } else if (state.equals(STATE_PENDING) && lifeState.equals(InterceptorLifeCycle.AFTER)) {
-            onPendingAfter();
+        if (state.equals(VERIFIED) && lifeState.equals(InterceptorLifeCycle.INTERCEPT)) {
+            interceptOnVerifyPass();
+        } else if (state.equals(VERIFIED) && lifeState.equals(InterceptorLifeCycle.COMPLETE)) {
+            completeOnVerifyPass();
+        } else if (state.equals(UNVERIFIED) && lifeState.equals(InterceptorLifeCycle.INTERCEPT)) {
+            interceptOnVerifyNotPass();
+        } else if (state.equals(UNVERIFIED) && lifeState.equals(InterceptorLifeCycle.COMPLETE)) {
+            completeOnVerifyNotPass();
+        } else if (state.equals(PENDING) && lifeState.equals(InterceptorLifeCycle.INTERCEPT)) {
+            interceptOnVerifying();
+        } else if (state.equals(PENDING) && lifeState.equals(InterceptorLifeCycle.COMPLETE)) {
+            completeOnVerifying();
         } else {
-            onEndBreak();
+            interrupt();
         }
 
     }

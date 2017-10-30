@@ -16,12 +16,12 @@ public class ConfigManager {
 
     private Map<String, RouteVO> configRouteMap;
 
-    private static final com.jinhui365.router.route.ConfigManager instance = new com.jinhui365.router.route.ConfigManager();
+    private static final ConfigManager instance = new ConfigManager();
 
     private ConfigManager() {
     }
 
-    public static com.jinhui365.router.route.ConfigManager getInstance() {
+    public static ConfigManager getInstance() {
         return instance;
     }
 

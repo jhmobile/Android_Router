@@ -10,9 +10,9 @@ package com.jinhui365.router.core;
 
 public enum InterceptorLifeCycle {
     DEFAULT,
-    START,
-    AFTER,
-    BREAK;
+    INTERCEPT,
+    COMPLETE,
+    INTERRUPT;
 
     InterceptorLifeCycle() {
     }

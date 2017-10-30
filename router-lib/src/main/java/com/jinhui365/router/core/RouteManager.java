@@ -26,7 +26,7 @@ public class RouteManager {
 
     private RouteContext currentContext;
 
-    private IErrorHandler handler;
+    private IRouteCallBack callBack;
 
     private IRouteTask iTarget;
 
@@ -37,15 +37,24 @@ public class RouteManager {
     public void setCurrentContext(RouteContext currentContext) {
         this.currentContext = currentContext;
     }
-    public IErrorHandler getHandler() {
-        return handler;
+
+    public IRouteCallBack getCallBack() {
+        return callBack;
     }
 
-    public void setHandler(IErrorHandler handler) {
-        this.handler = handler;
+    public void setCallBack(IRouteCallBack callBack) {
+        this.callBack = callBack;
     }
 
-    private static final RouteManager instance = new com.jinhui365.router.route.RouteManager();
+    public IRouteTask getiTarget() {
+        return iTarget;
+    }
+
+    public void setiTarget(IRouteTask iTarget) {
+        this.iTarget = iTarget;
+    }
+
+    private static final RouteManager instance = new RouteManager();
 
     private RouteManager() {
     }
@@ -60,7 +69,7 @@ public class RouteManager {
      * @param configJsonString
      */
     public void initialize(String configJsonString, IRouteCallBack callBack,IRouteTask iTarget) {
-        this.handler = handler;
+        this.callBack = callBack;
         this.iTarget = iTarget;
         ConfigManager.getInstance().init(configJsonString);
     }
