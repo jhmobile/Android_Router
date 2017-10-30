@@ -28,7 +28,7 @@ public class RouteManager {
 
     private IRouteCallBack callBack;
 
-    private IRouteTask iTarget;
+    private IRouteTask iTask;
 
     public RouteContext getCurrentContext() {
         return currentContext;
@@ -46,12 +46,12 @@ public class RouteManager {
         this.callBack = callBack;
     }
 
-    public IRouteTask getiTarget() {
-        return iTarget;
+    public IRouteTask getiTask() {
+        return iTask;
     }
 
-    public void setiTarget(IRouteTask iTarget) {
-        this.iTarget = iTarget;
+    public void setiTask(IRouteTask iTask) {
+        this.iTask = iTask;
     }
 
     private static final RouteManager instance = new RouteManager();
@@ -68,9 +68,9 @@ public class RouteManager {
      *
      * @param configJsonString
      */
-    public void initialize(String configJsonString, IRouteCallBack callBack,IRouteTask iTarget) {
+    public void initialize(String configJsonString, IRouteCallBack callBack, IRouteTask iTask) {
         this.callBack = callBack;
-        this.iTarget = iTarget;
+        this.iTask = iTask;
         ConfigManager.getInstance().init(configJsonString);
     }
 
@@ -104,34 +104,40 @@ public class RouteManager {
     }
 
     /**
-     * 拦截器执行完毕，回调路由库
+     * 拦截器没做执行验证，直接关闭
      */
-    public void interceptorBreak() {
-
+    public void interceptorInterrupts() {
+        if (null == currentContext || null == currentContext.getParent()) {
+            return;
+        }
+        currentContext.getParent().interrupt();
     }
 
-    public void interceptorForSkipResult(InterceptorState state) {
-        interceptorForSkipResult(state, "");
+    /**
+     * 拦截器执行完毕验证，回调路由库
+     */
+    public void interceptorVerifyResult(InterceptorState state) {
+        interceptorVerifyResult(state, "");
     }
 
 
-    public void interceptorForSkipResult(InterceptorState state, String json) {
+    public void interceptorVerifyResult(InterceptorState state, String json) {
         Map<String, Object> map = JsonUtil.jsonToMap(json, String.class, Object.class);
-        interceptorForSkipResult(state, map);
+        interceptorVerifyResult(state, map);
     }
 
-    public void interceptorForSkipResult(InterceptorState state, String key, Object value) {
+    public void interceptorVerifyResult(InterceptorState state, String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
-        interceptorForSkipResult(state, map);
+        interceptorVerifyResult(state, map);
     }
 
-    public void interceptorForSkipResult(InterceptorState state, Map<String, Object> map) {
+    public void interceptorVerifyResult(InterceptorState state, Map<String, Object> map) {
         if (null == currentContext || null == currentContext.getParent()) {
             return;
         }
 
-        currentContext.getParent().skipResultCallBack(state, map);
+        currentContext.getParent().complete(state, map);
     }
 
     /**
@@ -164,7 +170,7 @@ public class RouteManager {
      *
      * @return
      */
-    public String getCurrentUri() {
+    public String getCurrentUrl() {
         return "";
     }
 }

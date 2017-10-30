@@ -13,6 +13,6 @@ public interface IRouteCallBack {
      *
      * @param response
      */
-    void onSucces(RouteResponse response);
+    void onSuccess(RouteResponse response);
     void onFail(RouteResponse response);
 }

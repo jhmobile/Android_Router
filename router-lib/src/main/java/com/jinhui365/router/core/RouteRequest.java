@@ -121,7 +121,7 @@ public class RouteRequest implements Serializable {
         return removedInterceptors;
     }
 
-    public void addInterceptors(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
+    public void addInterceptors(Class<AbsInterceptor> clazz,Map<String, Object> options, int index) {
         if (this.addedInterceptors == null) {
             this.addedInterceptors = new ArrayList<>();
         }

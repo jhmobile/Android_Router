@@ -171,18 +171,23 @@ public class RouteContext {
      * @param state 回调状态
      * @param map   回调参数
      */
-    public void skipResultCallBack(InterceptorState state, Map<String, Object> map) {
+    public void complete(InterceptorState state, Map<String, Object> map) {
         AbsInterceptor currentInterceptor = getCurrentInterceptor();
         if (currentInterceptor != null) {
             if (null != map && !map.isEmpty()) {
                 currentInterceptor.getOptions().putAll(map);
             }
-            // 回调是默认状态，则代表打断
-            if (DEFAULT.equals(state)) {
-                currentInterceptor.onBreak();
-            } else {
-                currentInterceptor.onComplete();
-            }
+            currentInterceptor.onComplete();
+        }
+    }
+
+    /**
+     * 打断
+     */
+    public void interrupt() {
+        AbsInterceptor currentInterceptor = getCurrentInterceptor();
+        if (currentInterceptor != null) {
+            currentInterceptor.onInterrupt();
         }
     }
 

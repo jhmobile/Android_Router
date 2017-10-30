@@ -25,17 +25,12 @@ public class RouteContextBuilder {
     public RouteContextBuilder build(Uri uri) {
         mRouteRequest = new RouteRequest(uri);
         Map<String, Object> params = new HashMap<>();
-        params.put(Router.RAW_URI, uri == null ? null : uri.toString());
+        params.put(RouteManager.RAW_URI, uri == null ? null : uri.toString());
         mRouteRequest.setParams(params);
         return this;
     }
 
-    public RouteContextBuilder errorHandler(IErrorHandler handler) {
-        mRouteRequest.setHandler(handler);
-        return this;
-    }
-
-    public RouteContextBuilder callback(RouteCallback callback) {
+    public RouteContextBuilder callback(IRouteCallBack callback) {
         mRouteRequest.setCallback(callback);
         return this;
     }
@@ -115,33 +110,31 @@ public class RouteContextBuilder {
      * 添加拦截器
      *
      * @param clazz
-     * @param params
      * @param options
      * @return
      */
-    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options) {
-        addInterceptor(clazz, params, options, -1);
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, Map<String, Object> options) {
+        addInterceptor(clazz, options, -1);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String paramsJson, String optionsJson) {
-        addInterceptor(clazz, paramsJson, optionsJson, -1);
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String optionsJson) {
+        addInterceptor(clazz, optionsJson, -1);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String paramsJson, String optionsJson, int index) {
-        Map<String, Object> params = JsonUtil.jsonToMap(paramsJson, String.class, Object.class);
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, String optionsJson, int index) {
         Map<String, Object> options = JsonUtil.jsonToMap(optionsJson, String.class, Object.class);
-        addInterceptor(clazz, params, options, index);
+        addInterceptor(clazz, options, index);
         return this;
     }
 
-    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz, Map<String, Object> params, Map<String, Object> options, int index) {
-        mRouteRequest.addInterceptors(clazz, params, options, index);
+    public RouteContextBuilder addInterceptor(Class<AbsInterceptor> clazz,  Map<String, Object> options, int index) {
+        mRouteRequest.addInterceptors(clazz, options, index);
         return this;
     }
 
-    public void go(Context context, RouteCallback callback) {
+    public void go(Context context, IRouteCallBack callback) {
         mRouteRequest.setCallback(callback);
         go(context);
     }
@@ -173,9 +166,9 @@ public class RouteContextBuilder {
 //        } else {
 //            currentContext = new RouteContext(mRouteRequest, context);
 //        }
-        currentContext.setParent(Router.getInstance().getCurrentContext());
-        if (null != Router.getInstance().getCurrentContext()) {
-            Router.getInstance().getCurrentContext().addChild(currentContext);
+        currentContext.setParent(RouteManager.getInstance().getCurrentContext());
+        if (null != RouteManager.getInstance().getCurrentContext()) {
+            RouteManager.getInstance().getCurrentContext().addChild(currentContext);
         }
         currentContext.next();
     }
@@ -214,11 +207,8 @@ public class RouteContextBuilder {
      * @param response
      */
     private void callback(RouteResponse response) {
-        if (RouteState.SUCCEED != response.getCode() && mRouteRequest.getHandler() != null) {
-
-        }
         if (mRouteRequest.getCallback() != null) {
-            mRouteRequest.getCallback().callback(response);
+
         }
     }
 
